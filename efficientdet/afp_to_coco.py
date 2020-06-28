@@ -90,10 +90,10 @@ if __name__ == '__main__':
 
         coco_output["annotations"].append({
             "segmentation": segmentation,
-            "area": area,
+            "area": int(area),
             "iscrowd": 0,
             "image_id": i + 1,
-            "bbox": bbox,
+            "bbox": list(bbox),
             "category_id": 1,
             "id": i + 1
         })

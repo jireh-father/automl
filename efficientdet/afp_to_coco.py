@@ -12,7 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='End-to-end inference')
     parser.add_argument('--image_dir', dest='image_dir', default=None, type=str)
     parser.add_argument('--output_path', dest='output_path', default=None, type=str)
-    parser.add_argument('--output_image_dir', dest='output_image_dir', default=None, type=str)
+    # parser.add_argument('--output_image_dir', dest='output_image_dir', default=None, type=str)
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -49,7 +49,7 @@ def init_coco_annotation():
 if __name__ == '__main__':
     args = parse_args()
     os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
-    os.makedirs(args.output_image_dir, exist_ok=True)
+    # os.makedirs(args.output_image_dir, exist_ok=True)
 
     polygon_files = glob.glob(os.path.join(args.image_dir, "*.xy"))
 

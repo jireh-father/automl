@@ -253,6 +253,7 @@ def main(_):
       session_config=config_proto,
       tpu_config=tpu_config,
       tf_random_seed=FLAGS.tf_random_seed,
+      keep_checkpoint_max=None
   )
 
   model_fn_instance = det_model_fn.get_model_fn(FLAGS.model_name)

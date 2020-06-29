@@ -85,6 +85,66 @@ Then you will get:
 
 Notably, --tflite_path only works after 2.3.0-dev20200521
 
+```bash
+python model_inspect.py \
+--runmode=saved_model \
+--model_name=efficientdet-d0 \
+--ckpt_path=[trained_model_ckpt_dir] \
+--saved_model_dir=[saved_model_dir] \
+--tflite_path=[tflite_output_path] \
+--hparams="num_classes=2,image_size=224"
+```
+
+### tflite model test in python
+```python
+import numpy as np
+import tensorflow as tf
+from PIL import Image
+
+model_path = "mymodel.tflite"
+interpreter = tf.lite.Interpreter(model_path=model_path)
+interpreter.allocate_tensors()
+
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
+
+input_shape = input_details[0]['shape']
+im = Image.open("myimage.jpg").convert("RGB")
+o_w, o_h =im.size
+im = np.array(im.resize((input_shape[2], input_shape[1])))
+im = np.expand_dims(im, axis=0)
+interpreter.set_tensor(input_details[0]['index'], im)
+
+interpreter.invoke()
+
+output_data = interpreter.get_tensor(output_details[0]['index'])
+
+thres = 0.3
+r_h = input_shape[1]
+r_w = input_shape[2]
+eye_indexes = np.squeeze(np.argwhere(output_data[0,:,6] == 1), 1)
+eyes = []
+if len(eye_indexes) > 0:
+    top_k = 10
+    top_k_indexes = output_data[0][eye_indexes][:,5].argsort()[::-1][:top_k]
+    scores = output_data[0][top_k_indexes][:, 5]
+    bboxes = output_data[0][top_k_indexes][:, 1:5]
+    for i, score in enumerate(scores):
+        if score < thres:
+            break
+        r_y1, r_x1, r_y2, r_x2 = bboxes[i]
+        
+        y1 = r_y1 / r_h * o_h
+        y2 = r_y2 / r_h * o_h
+        x1 = r_x1 / r_w * o_w
+        x2 = r_x2 / r_w * o_w
+        
+        eyes.append([x1,y1,x2,y2])    
+    print(eyes)
+else:
+    print("no eyes")
+
+```
 
 ## 4. Benchmark model latency.
 

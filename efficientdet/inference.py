@@ -940,6 +940,8 @@ class InferenceDriver(object):
                         # [x, y, width, height]
                         box[2] = box[2] - box[0]
                         box[3] = box[3] - box[1]
+                        print(im.size)
+                        print(box)
                         im = im.crop(box)
                         image_file_name = os.path.splitext(os.path.basename(image_files[i]))[0]
                         output_image_path = os.path.join(output_dir, "{}_{}.jpg".format(image_file_name, j))

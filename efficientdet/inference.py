@@ -146,7 +146,7 @@ def build_inputs(image_path_pattern, image_size: Union[int, Tuple[int,
     else:
         files = image_path_pattern
     for f in files:
-        image = Image.open(f)
+        image = Image.open(f).convert("RGB")
         raw_images.append(image)
         image, scale = image_preprocess(image, image_size)
         images.append(image)

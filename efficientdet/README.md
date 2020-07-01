@@ -114,11 +114,12 @@ o_w, o_h =im.size
 im = np.array(im.resize((input_shape[2], input_shape[1])))
 im = np.expand_dims(im, axis=0)
 interpreter.set_tensor(input_details[0]['index'], im)
-
+import time
+start = time.time()
 interpreter.invoke()
-
+print(time.time() - start)
 output_data = interpreter.get_tensor(output_details[0]['index'])
-
+print(time.time() - start)
 thres = 0.3
 r_h = input_shape[1]
 r_w = input_shape[2]

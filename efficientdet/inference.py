@@ -943,5 +943,4 @@ class InferenceDriver(object):
                         image_file_name = os.path.splitext(os.path.basename(image_files[i]))[0]
                         output_image_path = os.path.join(output_dir, "{}_{}.jpg".format(image_file_name, j))
                         crop_im.save(output_image_path)
-                    logging.info('writing file to %s', output_image_path)
             tf.compat.v1.reset_default_graph()

@@ -932,6 +932,7 @@ class InferenceDriver(object):
                     classes = prediction[:, 6].astype(int)
                     # scores = prediction[:, 5]
                     im = Image.open(image_files[i]).convert("RGB")
+                    print(image_files[i])
                     for j, box in enumerate(boxes):
                         if classes[j] != 1:
                             continue

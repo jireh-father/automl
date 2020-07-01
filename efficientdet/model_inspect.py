@@ -432,7 +432,7 @@ class ModelInspector(object):
                 kwargs['input_image'],
                 trace_filename=kwargs.get('trace_filename', None))
         elif runmode in ('infer', 'saved_model', 'saved_model_infer',
-                         'saved_model_video'):
+                         'saved_model_video', 'infer_and_crop'):
             config_dict = {}
             if kwargs.get('line_thickness', None):
                 config_dict['line_thickness'] = kwargs.get('line_thickness')

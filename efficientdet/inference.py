@@ -39,6 +39,7 @@ import utils
 from visualize import vis_utils
 from keras import efficientdet_arch_keras
 from tensorflow.python.client import timeline  # pylint: disable=g-direct-tensorflow-import
+import time
 
 coco_id_mapping = {
     1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorcycle', 5: 'airplane',
@@ -854,7 +855,10 @@ class InferenceDriver(object):
                                       anchors.MIN_SCORE_THRESH),
           max_boxes_to_draw=kwargs.get('max_boxes_to_draw',
                                        anchors.MAX_DETECTIONS_PER_IMAGE))
+
+      start = time.time()
       predictions = sess.run(detections_batch)
+      print("pred exec time", time.time()-start)
       # Visualize results.
       for i, prediction in enumerate(predictions):
         img = visualize_image_prediction(

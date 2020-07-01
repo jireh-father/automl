@@ -898,7 +898,6 @@ class InferenceDriver(object):
         for step in range(steps):
             image_files = image_file_list[step * batch_size:(step + 1) * batch_size]
             with tf.Session() as sess:
-                tf.compat.v1.reset_default_graph()
                 # Buid inputs and preprocessing.
                 raw_images, images, scales = build_inputs(image_files,
                                                           params['image_size'])
@@ -946,3 +945,4 @@ class InferenceDriver(object):
                         output_image_path = os.path.join(output_dir, "{}_{}.jpg".format(image_file_name, j))
                         im.save(output_image_path)
                     logging.info('writing file to %s', output_image_path)
+                tf.compat.v1.reset_default_graph()

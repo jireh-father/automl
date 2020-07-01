@@ -898,6 +898,7 @@ class InferenceDriver(object):
         for step in range(steps):
             image_files = image_file_list[step * batch_size:(step + 1) * batch_size]
             with tf.Session() as sess:
+                tf.compat.v1.reset_default_graph()
                 # Buid inputs and preprocessing.
                 raw_images, images, scales = build_inputs(image_files,
                                                           params['image_size'])
@@ -938,6 +939,8 @@ class InferenceDriver(object):
                         if classes[j] != 1:
                             continue
                         # [x, y, width, height]
+                        box[2] = box[2] - box[0]
+                        box[3] = box[3] - box[1]
                         im = im.crop(box)
                         image_file_name = os.path.splitext(os.path.basename(image_files[i]))[0]
                         output_image_path = os.path.join(output_dir, "{}_{}.jpg".format(image_file_name, j))

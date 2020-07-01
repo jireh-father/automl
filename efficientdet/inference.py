@@ -40,6 +40,8 @@ from visualize import vis_utils
 from keras import efficientdet_arch_keras
 from tensorflow.python.client import timeline  # pylint: disable=g-direct-tensorflow-import
 import time
+import glob
+import math
 
 coco_id_mapping = {
     1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorcycle', 5: 'airplane',
@@ -123,8 +125,8 @@ def batch_image_preprocess(raw_images,
     return (images, scales)
 
 
-def build_inputs(image_path_pattern: Text, image_size: Union[int, Tuple[int,
-                                                                        int]]):
+def build_inputs(image_path_pattern, image_size: Union[int, Tuple[int,
+                                                                  int]]):
     """Read and preprocess input images.
 
     Args:
@@ -139,7 +141,11 @@ def build_inputs(image_path_pattern: Text, image_size: Union[int, Tuple[int,
       ValueError if image_path_pattern doesn't match any file.
     """
     raw_images, images, scales = [], [], []
-    for f in tf.io.gfile.glob(image_path_pattern):
+    if isinstance(image_path_pattern, str):
+        files = tf.io.gfile.glob(image_path_pattern)
+    else:
+        files = image_path_pattern
+    for f in files:
         image = Image.open(f)
         raw_images.append(image)
         image, scale = image_preprocess(image, image_size)
@@ -176,7 +182,7 @@ def build_model(model_name: Text, inputs: tf.Tensor, **kwargs):
 
             start = time.time()
             cls_out_list, box_out_list = model(feats)
-            print("infer exec time", time.time()- start)
+            print("infer exec time", time.time() - start)
             # convert the list of model outputs to a dictionary with key=level.
             assert len(cls_out_list) == config.max_level - config.min_level + 1
             assert len(box_out_list) == config.max_level - config.min_level + 1
@@ -875,7 +881,7 @@ class InferenceDriver(object):
 
             return predictions
 
-    def inference_and_crop(self, image_path_pattern: Text, output_dir: Text, batch_size: int, **kwargs):
+    def inference_and_crop(self, image_image_path: str, output_dir: Text, batch_size: int, **kwargs):
         """Read and preprocess input images.
 
         Args:
@@ -888,49 +894,54 @@ class InferenceDriver(object):
         Returns:
           Annotated image.
         """
+        image_file_list = glob.glob(image_image_path)
+        steps = math.ceil(len(image_file_list) / batch_size)
         params = copy.deepcopy(self.params)
-        with tf.Session() as sess:
-            # Buid inputs and preprocessing.
-            raw_images, images, scales = build_inputs(image_path_pattern,
-                                                      params['image_size'])
-            if params['data_format'] == 'channels_first':
-                images = tf.transpose(images, [0, 3, 1, 2])
-            # Build model.
-            class_outputs, box_outputs = build_model(self.model_name, images,
-                                                     **self.params)
-            restore_ckpt(
-                sess,
-                self.ckpt_path,
-                ema_decay=self.params['moving_average_decay'],
-                export_ckpt=None)
-            # for postprocessing.
-            params.update(
-                dict(batch_size=len(raw_images), disable_pyfun=self.disable_pyfun))
+        for step in range(steps):
+            image_files = image_file_list[step * batch_size:(step + 1) * batch_size]
+            with tf.Session() as sess:
+                # Buid inputs and preprocessing.
+                raw_images, images, scales = build_inputs(image_files,
+                                                          params['image_size'])
+                if params['data_format'] == 'channels_first':
+                    images = tf.transpose(images, [0, 3, 1, 2])
+                # Build model.
+                class_outputs, box_outputs = build_model(self.model_name, images,
+                                                         **self.params)
+                restore_ckpt(
+                    sess,
+                    self.ckpt_path,
+                    ema_decay=self.params['moving_average_decay'],
+                    export_ckpt=None)
+                # for postprocessing.
+                params.update(
+                    dict(batch_size=len(raw_images), disable_pyfun=self.disable_pyfun))
 
-            # Build postprocessing.
-            detections_batch = det_post_process(
-                params,
-                class_outputs,
-                box_outputs,
-                scales,
-                min_score_thresh=kwargs.get('min_score_thresh',
-                                            anchors.MIN_SCORE_THRESH),
-                max_boxes_to_draw=kwargs.get('max_boxes_to_draw',
-                                             anchors.MAX_DETECTIONS_PER_IMAGE))
+                # Build postprocessing.
+                detections_batch = det_post_process(
+                    params,
+                    class_outputs,
+                    box_outputs,
+                    scales,
+                    min_score_thresh=kwargs.get('min_score_thresh',
+                                                anchors.MIN_SCORE_THRESH),
+                    max_boxes_to_draw=kwargs.get('max_boxes_to_draw',
+                                                 anchors.MAX_DETECTIONS_PER_IMAGE))
 
-            start = time.time()
-            predictions = sess.run(detections_batch)
-            print("pred exec time", time.time() - start)
-            # Visualize results.
-            for i, prediction in enumerate(predictions):
-                img = visualize_image_prediction(
-                    raw_images[i],
-                    prediction,
-                    disable_pyfun=self.disable_pyfun,
-                    label_id_mapping=self.label_id_mapping,
-                    **kwargs)
-                output_image_path = os.path.join(output_dir, str(i) + '.jpg')
-                Image.fromarray(img).save(output_image_path)
-                logging.info('writing file to %s', output_image_path)
-
-            return predictions
+                start = time.time()
+                predictions = sess.run(detections_batch)
+                print("pred exec time", time.time() - start)
+                for i, prediction in enumerate(predictions):
+                    boxes = prediction[:, 1:5]
+                    classes = prediction[:, 6].astype(int)
+                    # scores = prediction[:, 5]
+                    im = Image.open(image_files[i]).convert("RGB")
+                    for j, box in enumerate(boxes):
+                        if classes[j] != 1:
+                            continue
+                        # [x, y, width, height]
+                        im = im.crop(box)
+                        image_file_name = os.path.splitext(os.path.basename(image_files[i]))[0]
+                        output_image_path = os.path.join(output_dir, "{}_{}.jpg".format(image_file_name, j))
+                        im.save(output_image_path)
+                    logging.info('writing file to %s', output_image_path)

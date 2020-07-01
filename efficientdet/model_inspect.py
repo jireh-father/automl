@@ -248,6 +248,7 @@ class ModelInspector(object):
           break
 
   def inference_single_image(self, image_image_path, output_dir, **kwargs):
+    os.makedirs(output_dir, exist_ok=True)
     driver = inference.InferenceDriver(self.model_name, self.ckpt_path,
                                        self.model_config.as_dict())
     driver.inference(image_image_path, output_dir, **kwargs)

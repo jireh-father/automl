@@ -180,9 +180,7 @@ def build_model(model_name: Text, inputs: tf.Tensor, **kwargs):
             config.override(kwargs)
             model = efficientdet_arch_keras.EfficientDetModel(config=config)
 
-            start = time.time()
             cls_out_list, box_out_list = model(feats)
-            print("infer exec time", time.time() - start)
             # convert the list of model outputs to a dictionary with key=level.
             assert len(cls_out_list) == config.max_level - config.min_level + 1
             assert len(box_out_list) == config.max_level - config.min_level + 1

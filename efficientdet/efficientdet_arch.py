@@ -659,10 +659,7 @@ def efficientdet(features, model_name=None, config=None, **kwargs):
       *utils.num_params_flops()))
 
   # build class and box predictions.
-  import time
-  start = time.time()
   class_outputs, box_outputs = build_class_and_box_outputs(fpn_feats, config)
-  print("infer exec time", time.time() - start)
   logging.info('backbone+fpn+box params/flops = {:.6f}M, {:.9f}B'.format(
       *utils.num_params_flops()))
 

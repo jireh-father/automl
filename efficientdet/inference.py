@@ -939,7 +939,7 @@ class InferenceDriver(object):
                         # [x, y, width, height]
                         print(im.size)
                         print(box)
-                        crop_im = im.crop(box)
+                        crop_im = im.crop((box[1], box[0], box[3], box[2]))
                         image_file_name = os.path.splitext(os.path.basename(image_files[i]))[0]
                         output_image_path = os.path.join(output_dir, "{}_{}.jpg".format(image_file_name, j))
                         crop_im.save(output_image_path)

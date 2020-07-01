@@ -943,4 +943,4 @@ class InferenceDriver(object):
                         output_image_path = os.path.join(output_dir, "{}_{}.jpg".format(image_file_name, j))
                         im.save(output_image_path)
                     logging.info('writing file to %s', output_image_path)
-                tf.compat.v1.reset_default_graph()
+            tf.compat.v1.reset_default_graph()

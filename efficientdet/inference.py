@@ -926,9 +926,7 @@ class InferenceDriver(object):
                     max_boxes_to_draw=kwargs.get('max_boxes_to_draw',
                                                  anchors.MAX_DETECTIONS_PER_IMAGE))
 
-                start = time.time()
                 predictions = sess.run(detections_batch)
-                print("pred exec time", time.time() - start)
                 for i, prediction in enumerate(predictions):
                     boxes = prediction[:, 1:5]
                     classes = prediction[:, 6].astype(int)
@@ -938,8 +936,6 @@ class InferenceDriver(object):
                         if classes[j] != 1:
                             continue
                         # [x, y, width, height]
-                        box[2] = box[2] - box[0]
-                        box[3] = box[3] - box[1]
                         print(im.size)
                         print(box)
                         im = im.crop(box)

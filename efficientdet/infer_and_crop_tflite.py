@@ -41,7 +41,7 @@ def main(_):
         interpreter.invoke()
         output_data = interpreter.get_tensor(output_details[0]['index'])
         exec_time = time.time() - start
-        print(image_file, exec_time)
+        print(i, len(image_files), image_file, exec_time)
         total_exec_time += exec_time
         r_h = input_shape[1]
         r_w = input_shape[2]

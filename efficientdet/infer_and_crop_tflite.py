@@ -40,6 +40,7 @@ def main(_):
         start = time.time()
         interpreter.invoke()
         output_data = interpreter.get_tensor(output_details[0]['index'])
+        print(output_data)
         exec_time = time.time() - start
         print(image_file, exec_time)
         total_exec_time += exec_time

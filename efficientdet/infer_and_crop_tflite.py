@@ -54,6 +54,7 @@ def main(_):
             bboxes = output_data[0][top_k_indexes][:, 1:5]
             for j, score in enumerate(scores):
                 if score < FLAGS.min_score_thresh:
+                    print("skip", score, "<", FLAGS.min_score_thresh)
                     break
                 r_y1, r_x1, r_y2, r_x2 = bboxes[j]
 
@@ -71,6 +72,7 @@ def main(_):
         else:
             print("no eyes")
     print("avg exec time", total_exec_time / len(image_files), "total images", len(image_files))
+
 
 if __name__ == '__main__':
     # tf.disable_eager_execution()

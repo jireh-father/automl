@@ -979,6 +979,9 @@ class InferenceDriver(object):
             fp = splitext[0]
             real_file_name = "_".join(os.path.basename(fp).split("_")[:-1])
             real_file_path = os.path.join(real_image_dir, real_file_name + ext)
+
+            if not os.path.isfile(real_file_path):
+                real_file_path = os.path.join(real_image_dir, real_file_name + ".jpeg")
             if not os.path.isfile(real_file_path):
                 real_file_path = os.path.join(real_image_dir, real_file_name + ".png")
             if not os.path.isfile(real_file_path):

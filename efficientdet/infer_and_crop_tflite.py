@@ -30,6 +30,7 @@ def main(_):
     image_files = glob.glob(FLAGS.input_image)
     os.makedirs(FLAGS.output_image_dir, exist_ok=True)
 
+    total_exec_time = 0.
     for i, image_file in enumerate(image_files):
         pil_im = Image.open(image_file).convert("RGB")
         o_w, o_h = pil_im.size
@@ -38,9 +39,10 @@ def main(_):
         interpreter.set_tensor(input_details[0]['index'], im)
         start = time.time()
         interpreter.invoke()
-        print(time.time() - start)
         output_data = interpreter.get_tensor(output_details[0]['index'])
-        print(time.time() - start)
+        exec_time = time.time() - start
+        print(image_file, exec_time)
+        total_exec_time += exec_time
         r_h = input_shape[1]
         r_w = input_shape[2]
         eye_indexes = np.squeeze(np.argwhere(output_data[0, :, 6] == FLAGS.target_label_idx), 1)
@@ -67,7 +69,7 @@ def main(_):
             print(eyes)
         else:
             print("no eyes")
-
+    print("avg exec time", total_exec_time / len(image_files))
 
 if __name__ == '__main__':
     # tf.disable_eager_execution()

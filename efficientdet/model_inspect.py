@@ -501,7 +501,8 @@ def main(_):
         min_score_thresh=FLAGS.min_score_thresh,
         bm_runs=FLAGS.bm_runs,
         threads=FLAGS.threads,
-        trace_filename=FLAGS.trace_filename)
+        trace_filename=FLAGS.trace_filename,
+        real_image_dir=FLAGS.real_image_dir)
 
 
 if __name__ == '__main__':

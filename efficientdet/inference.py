@@ -895,7 +895,7 @@ class InferenceDriver(object):
         """
 
 
-        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(os.path.join(output_dir, "crop"), exist_ok=True)
         os.makedirs(os.path.join(output_dir, "vis"), exist_ok=True)
 
         image_file_list = glob.glob(image_image_path)

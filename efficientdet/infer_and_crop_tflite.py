@@ -70,7 +70,7 @@ def main(_):
             print(eyes)
         else:
             print("no eyes")
-    print("avg exec time", total_exec_time / len(image_files))
+    print("avg exec time", total_exec_time / len(image_files), "total images", len(image_files))
 
 if __name__ == '__main__':
     # tf.disable_eager_execution()

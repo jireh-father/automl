@@ -893,6 +893,11 @@ class InferenceDriver(object):
         Returns:
           Annotated image.
         """
+
+
+        os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(os.path.join(output_dir, "vis"), exist_ok=True)
+
         image_file_list = glob.glob(image_image_path)
         steps = math.ceil(len(image_file_list) / batch_size)
         params = copy.deepcopy(self.params)
@@ -970,6 +975,7 @@ class InferenceDriver(object):
           Annotated image.
         """
         os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(os.path.join(output_dir, "vis"), exist_ok=True)
 
         image_file_list = glob.glob(image_image_path)
         real_image_dict = {}

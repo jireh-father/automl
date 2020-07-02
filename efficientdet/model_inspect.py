@@ -57,6 +57,8 @@ flags.DEFINE_string(
                    ' containing attributes to use as hyperparameters.')
 
 flags.DEFINE_string('input_image', None, 'Input image path for inference.')
+
+flags.DEFINE_string('real_image_dir', None, 'Input image path for inference.')
 flags.DEFINE_string('output_image_dir', None, 'Output dir for inference.')
 
 # For video.
@@ -253,11 +255,17 @@ class ModelInspector(object):
                                            self.model_config.as_dict())
         driver.inference(image_image_path, output_dir, **kwargs)
 
-    def inference_and_crop(self, image_image_path, output_dir, **kwargs):
+    def inference_and_crop(self, image_image_path, output_dir, real_image_dir, **kwargs):
         os.makedirs(output_dir, exist_ok=True)
         driver = inference.InferenceDriver(self.model_name, self.ckpt_path,
                                            self.model_config.as_dict())
-        driver.inference_and_crop(image_image_path, output_dir, self.batch_size, **kwargs)
+        driver.inference_and_crop(image_image_path, output_dir, real_image_dir, self.batch_size, **kwargs)
+
+    def inference_and_extract(self, image_image_path, output_dir, **kwargs):
+        os.makedirs(output_dir, exist_ok=True)
+        driver = inference.InferenceDriver(self.model_name, self.ckpt_path,
+                                           self.model_config.as_dict())
+        driver.inference_and_extract(image_image_path, output_dir, self.batch_size, **kwargs)
 
     def build_and_save_model(self):
         """build and save the model into self.logdir."""
@@ -432,7 +440,7 @@ class ModelInspector(object):
                 kwargs['input_image'],
                 trace_filename=kwargs.get('trace_filename', None))
         elif runmode in ('infer', 'saved_model', 'saved_model_infer',
-                         'saved_model_video', 'infer_and_crop'):
+                         'saved_model_video', 'infer_and_crop', 'infer_and_extract'):
             config_dict = {}
             if kwargs.get('line_thickness', None):
                 config_dict['line_thickness'] = kwargs.get('line_thickness')
@@ -448,6 +456,8 @@ class ModelInspector(object):
                                             kwargs['output_image_dir'], **config_dict)
             elif runmode == 'infer_and_crop':
                 self.inference_and_crop(kwargs['input_image'], kwargs['output_image_dir'], **config_dict)
+            elif runmode == 'infer_and_extract':
+                self.inference_and_crop(kwargs['input_image'], kwargs['output_image_dir'], kwargs['real_image_dir'], **config_dict)
             elif runmode == 'saved_model_infer':
                 self.saved_model_inference(kwargs['input_image'],
                                            kwargs['output_image_dir'], **config_dict)

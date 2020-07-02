@@ -42,6 +42,7 @@ from tensorflow.python.client import timeline  # pylint: disable=g-direct-tensor
 import time
 import glob
 import math
+import json
 
 coco_id_mapping = {
     1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorcycle', 5: 'airplane',
@@ -941,6 +942,109 @@ class InferenceDriver(object):
                         print(box)
                         crop_im = im.crop((box[1], box[0], box[3], box[2]))
                         image_file_name = os.path.splitext(os.path.basename(image_files[i]))[0]
-                        output_image_path = os.path.join(output_dir, "{}_{}.jpg".format(image_file_name, j))
+                        output_image_path = os.path.join(output_dir, "crop", "{}_{}.jpg".format(image_file_name, j))
                         crop_im.save(output_image_path)
+
+                    img = visualize_image_prediction(
+                        raw_images[i],
+                        prediction,
+                        disable_pyfun=self.disable_pyfun,
+                        label_id_mapping=self.label_id_mapping,
+                        **kwargs)
+                    output_image_path = os.path.join(output_dir, "vis", str(i) + '.jpg')
+                    Image.fromarray(img).save(output_image_path)
             tf.compat.v1.reset_default_graph()
+
+    def inference_and_extract(self, image_image_path: str, output_dir: Text, real_image_dir: Text, batch_size: int,
+                              **kwargs):
+        """Read and preprocess input images.
+
+        Args:
+          image_path_pattern: Image file pattern such as /tmp/img*.jpg
+          output_dir: the directory for output images. Output images will be named
+            as 0.jpg, 1.jpg, ....
+          **kwargs: extra parameters for for vistualization, such as
+            min_score_thresh, max_boxes_to_draw, and line_thickness.
+
+        Returns:
+          Annotated image.
+        """
+        os.makedirs(output_dir, exist_ok=True)
+
+        image_file_list = glob.glob(image_image_path)
+        real_image_dict = {}
+        for image_file in image_file_list:
+            splitext = os.path.splitext(image_file)
+            ext = splitext[1]
+            fp = splitext[0]
+            real_file_name = "_".join(os.path.basename(fp).split("_")[:-1])
+            real_file_path = os.path.join(real_image_dir, real_file_name + ext)
+            if real_file_path not in real_image_dict:
+                real_image_dict[real_file_path] = []
+            real_image_dict[real_file_path].append(int(os.path.basename(fp).split("_")[-1]))
+
+        params = copy.deepcopy(self.params)
+        real_image_file_list = list(real_image_dict.keys())
+        steps = math.ceil(len(real_image_file_list) / batch_size)
+        annotations = {}
+        for step in range(steps):
+            image_files = real_image_file_list[step * batch_size:(step + 1) * batch_size]
+            with tf.Session() as sess:
+                # Buid inputs and preprocessing.
+                raw_images, images, scales = build_inputs(image_files,
+                                                          params['image_size'])
+                if params['data_format'] == 'channels_first':
+                    images = tf.transpose(images, [0, 3, 1, 2])
+                # Build model.
+                class_outputs, box_outputs = build_model(self.model_name, images,
+                                                         **self.params)
+                restore_ckpt(
+                    sess,
+                    self.ckpt_path,
+                    ema_decay=self.params['moving_average_decay'],
+                    export_ckpt=None)
+                # for postprocessing.
+                params.update(
+                    dict(batch_size=len(raw_images), disable_pyfun=self.disable_pyfun))
+
+                # Build postprocessing.
+                detections_batch = det_post_process(
+                    params,
+                    class_outputs,
+                    box_outputs,
+                    scales,
+                    min_score_thresh=kwargs.get('min_score_thresh',
+                                                anchors.MIN_SCORE_THRESH),
+                    max_boxes_to_draw=kwargs.get('max_boxes_to_draw',
+                                                 anchors.MAX_DETECTIONS_PER_IMAGE))
+
+                predictions = sess.run(detections_batch)
+                for i, prediction in enumerate(predictions):
+                    boxes = prediction[:, 1:5]
+                    classes = prediction[:, 6].astype(int)
+                    # scores = prediction[:, 5]
+
+                    target_indexes = real_image_dict[image_files[i]]
+                    image_fn = os.path.basename(image_files[i])
+                    width, height = raw_images[i]
+                    annotations[image_fn] = {"width": width, "height": height, "bbox": []}
+                    for j, box in enumerate(boxes):
+                        if j not in target_indexes:
+                            continue
+                        if classes[j] != 1:
+                            continue
+
+                        # [x, y, width, height]
+                        bbox = {"x1": box[1], "y1": box[0], "x2": box[3], "y2": box[2]}
+                        annotations[image_fn]["bbox"].append(bbox)
+
+                    img = visualize_image_prediction(
+                        raw_images[i],
+                        prediction[target_indexes],
+                        disable_pyfun=self.disable_pyfun,
+                        label_id_mapping=self.label_id_mapping,
+                        **kwargs)
+                    output_image_path = os.path.join(output_dir, "vis", str(i) + '.jpg')
+                    Image.fromarray(img).save(output_image_path)
+            tf.compat.v1.reset_default_graph()
+        json.dumps(annotations, open(os.path.join(output_dir, "annotation.json"), "w+"))

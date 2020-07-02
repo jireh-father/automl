@@ -1060,4 +1060,4 @@ class InferenceDriver(object):
                     output_image_path = os.path.join(output_dir, "vis", str(i) + '.jpg')
                     Image.fromarray(img).save(output_image_path)
             tf.compat.v1.reset_default_graph()
-        json.dumps(annotations, open(os.path.join(output_dir, "annotation.json"), "w+"))
+        json.dump(annotations, open(os.path.join(output_dir, "annotation.json"), "w+"))

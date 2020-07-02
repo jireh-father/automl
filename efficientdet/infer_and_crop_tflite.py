@@ -40,7 +40,6 @@ def main(_):
         start = time.time()
         interpreter.invoke()
         output_data = interpreter.get_tensor(output_details[0]['index'])
-        print(output_data)
         exec_time = time.time() - start
         print(image_file, exec_time)
         total_exec_time += exec_time
@@ -56,7 +55,7 @@ def main(_):
             for j, score in enumerate(scores):
                 if score < FLAGS.min_score_thresh:
                     break
-                r_y1, r_x1, r_y2, r_x2 = bboxes[i]
+                r_y1, r_x1, r_y2, r_x2 = bboxes[j]
 
                 y1 = r_y1 / r_h * o_h
                 y2 = r_y2 / r_h * o_h

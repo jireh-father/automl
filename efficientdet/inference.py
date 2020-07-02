@@ -1033,7 +1033,7 @@ class InferenceDriver(object):
 
                     target_indexes = real_image_dict[image_files[i]]
                     image_fn = os.path.basename(image_files[i])
-                    width, height = raw_images[i]
+                    width, height = raw_images[i].size
                     annotations[image_fn] = {"width": width, "height": height, "bbox": []}
                     for j, box in enumerate(boxes):
                         if j not in target_indexes:

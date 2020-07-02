@@ -255,17 +255,17 @@ class ModelInspector(object):
                                            self.model_config.as_dict())
         driver.inference(image_image_path, output_dir, **kwargs)
 
-    def inference_and_crop(self, image_image_path, output_dir, real_image_dir, **kwargs):
+    def inference_and_crop(self, image_image_path, output_dir, **kwargs):
         os.makedirs(output_dir, exist_ok=True)
         driver = inference.InferenceDriver(self.model_name, self.ckpt_path,
                                            self.model_config.as_dict())
-        driver.inference_and_crop(image_image_path, output_dir, real_image_dir, self.batch_size, **kwargs)
+        driver.inference_and_crop(image_image_path, output_dir, self.batch_size, **kwargs)
 
-    def inference_and_extract(self, image_image_path, output_dir, **kwargs):
+    def inference_and_extract(self, image_image_path, output_dir, real_image_dir, **kwargs):
         os.makedirs(output_dir, exist_ok=True)
         driver = inference.InferenceDriver(self.model_name, self.ckpt_path,
                                            self.model_config.as_dict())
-        driver.inference_and_extract(image_image_path, output_dir, self.batch_size, **kwargs)
+        driver.inference_and_extract(image_image_path, output_dir, real_image_dir, self.batch_size, **kwargs)
 
     def build_and_save_model(self):
         """build and save the model into self.logdir."""
@@ -457,7 +457,7 @@ class ModelInspector(object):
             elif runmode == 'infer_and_crop':
                 self.inference_and_crop(kwargs['input_image'], kwargs['output_image_dir'], **config_dict)
             elif runmode == 'infer_and_extract':
-                self.inference_and_crop(kwargs['input_image'], kwargs['output_image_dir'], kwargs['real_image_dir'], **config_dict)
+                self.inference_and_extract(kwargs['input_image'], kwargs['output_image_dir'], kwargs['real_image_dir'], **config_dict)
             elif runmode == 'saved_model_infer':
                 self.saved_model_inference(kwargs['input_image'],
                                            kwargs['output_image_dir'], **config_dict)

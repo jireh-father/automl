@@ -92,7 +92,7 @@ python model_inspect.py \
 --ckpt_path=[trained_model_ckpt_dir] \
 --saved_model_dir=[saved_model_dir] \
 --tflite_path=[tflite_output_path] \
---hparams="num_classes=2,image_size=224"
+--hparams="num_classes=2"
 ```
 
 ### tflite model test in python

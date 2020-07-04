@@ -769,6 +769,8 @@ class ServingDriver(object):
                 input_shapes=input_shapes,
                 output_arrays=[signitures['prediction'].op.name])
             converter.experimental_new_converter = True
+            converter.inference_type = tf.float32
+            converter.inference_input_type = tf.float32
             converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]
             tflite_model = converter.convert()
 

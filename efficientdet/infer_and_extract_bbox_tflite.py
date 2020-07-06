@@ -99,12 +99,13 @@ def main(_):
                 print(o_w, o_h, (x1, y1, x2, y2))
                 eyes_bboxes.append({"x1": x1, "y1": y1, "x2": x2, "y2": y2})
             print(eyes_bboxes)
-            for j, bbox_idx in enumerate(bbox_idxs):
-                if bbox_idx >= len(eyes_bboxes):
-                    raise Exception("invalid bbox index!", bbox_idx, eyes_bboxes)
-                bbox = eyes_bboxes[bbox_idx]
-                bbox["label"] = labels[j]
-                annotations[image_fn]["bbox"].append(bbox)
+            if eyes_bboxes:
+                for j, bbox_idx in enumerate(bbox_idxs):
+                    if bbox_idx >= len(eyes_bboxes):
+                        raise Exception("invalid bbox index!", bbox_idx, eyes_bboxes)
+                    bbox = eyes_bboxes[bbox_idx]
+                    bbox["label"] = labels[j]
+                    annotations[image_fn]["bbox"].append(bbox)
         else:
             print("no eyes")
 

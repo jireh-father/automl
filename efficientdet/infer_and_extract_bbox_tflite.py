@@ -10,6 +10,7 @@ import json
 
 flags.DEFINE_string('input_image', None, 'Input image path for inference.')
 flags.DEFINE_string('output_path', None, 'Output dir for inference.')
+flags.DEFINE_string('output_image_dir', None, 'Output dir for inference.')
 flags.DEFINE_string('real_image_dir', None, 'Output dir for inference.')
 
 flags.DEFINE_float('min_score_thresh', 0.3, 'Score threshold to show box.')
@@ -98,6 +99,12 @@ def main(_):
                 x2 = r_x2 / r_w * o_w
                 print(o_w, o_h, (x1, y1, x2, y2))
                 eyes_bboxes.append({"x1": x1, "y1": y1, "x2": x2, "y2": y2})
+
+                crop_im = pil_im.crop((x1, y1, x2, y2))
+                output_filename = "{}_{}.jpg".format(os.path.splitext(os.path.basename(image_file))[0], j)
+                output_path = os.path.join(FLAGS.output_image_dir, output_filename)
+                crop_im.save(output_path)
+
             print(eyes_bboxes)
             if eyes_bboxes:
                 for j, bbox_idx in enumerate(bbox_idxs):

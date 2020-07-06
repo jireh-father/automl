@@ -61,6 +61,7 @@ def main(_):
     total_exec_time = 0.
     for i, image_file in enumerate(real_image_dict):
         bbox_idx_and_labels = real_image_dict[image_file]
+        print(image_file, bbox_idx_and_labels)
         bbox_idxs = [item[0] for item in bbox_idx_and_labels]
         labels = [item[1] for item in bbox_idx_and_labels]
         pil_im = Image.open(image_file).convert("RGB")

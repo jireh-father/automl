@@ -34,6 +34,7 @@ def main(_):
     image_file_list.sort()
     if os.path.dirname(FLAGS.output_path):
         os.makedirs(os.path.dirname(FLAGS.output_path), exist_ok=True)
+    os.makedirs(FLAGS.output_image_dir, exist_ok=True)
     real_image_dict = {}
     label_dict = {}
     for image_file in image_file_list:

@@ -6,11 +6,13 @@ import glob
 import time
 from PIL import Image
 import os
+import shutil
 import json
 
 flags.DEFINE_string('input_image', None, 'Input image path for inference.')
 flags.DEFINE_string('output_path', None, 'Output dir for inference.')
 flags.DEFINE_string('output_image_dir', None, 'Output dir for inference.')
+flags.DEFINE_string('vis_image_dir', None, 'Output dir for inference.')
 flags.DEFINE_string('real_image_dir', None, 'Output dir for inference.')
 
 flags.DEFINE_float('min_score_thresh', 0.3, 'Score threshold to show box.')
@@ -35,6 +37,7 @@ def main(_):
     if os.path.dirname(FLAGS.output_path):
         os.makedirs(os.path.dirname(FLAGS.output_path), exist_ok=True)
     os.makedirs(FLAGS.output_image_dir, exist_ok=True)
+    os.makedirs(FLAGS.vis_image_dir, exist_ok=True)
     real_image_dict = {}
     label_dict = {}
     for image_file in image_file_list:
@@ -103,11 +106,12 @@ def main(_):
 
                 crop_im = pil_im.crop((x1, y1, x2, y2))
                 output_filename = "{}_{}.jpg".format(os.path.splitext(os.path.basename(image_file))[0], j)
-                output_path = os.path.join(FLAGS.output_image_dir, output_filename)
+                output_path = os.path.join(FLAGS.vis_image_dir, output_filename)
                 crop_im.save(output_path)
 
             print(eyes_bboxes)
             if eyes_bboxes:
+                shutil.copy(image_file, FLAGS.output_image_dir)
                 for j, bbox_idx in enumerate(bbox_idxs):
                     if bbox_idx >= len(eyes_bboxes):
                         raise Exception("invalid bbox index!", bbox_idx, eyes_bboxes)

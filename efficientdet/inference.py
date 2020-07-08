@@ -43,6 +43,8 @@ import time
 import glob
 import math
 import json
+import shutil
+
 
 coco_id_mapping = {
     1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorcycle', 5: 'airplane',
@@ -979,6 +981,7 @@ class InferenceDriver(object):
           Annotated image.
         """
         os.makedirs(os.path.join(output_dir, "vis"), exist_ok=True)
+        os.makedirs(os.path.join(output_dir, "image"), exist_ok=True)
 
         # image_file_list = glob.glob(image_image_path)
         # real_image_dict = {}
@@ -1084,7 +1087,7 @@ class InferenceDriver(object):
                         # [x, y, width, height]
                         bbox = {"x1": box[1], "y1": box[0], "x2": box[3], "y2": box[2], "label": label}
                         annotations[image_fn]["bbox"].append(bbox)
-
+                    shutil.copy(image_file, os.path.join(output_dir, "image"))
                     img = visualize_image_prediction(
                         raw_images[i],
                         prediction[target_indexes],

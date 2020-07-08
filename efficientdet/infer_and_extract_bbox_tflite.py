@@ -20,6 +20,8 @@ flags.DEFINE_integer('target_label_idx', 1, 'Score threshold to show box.')
 
 flags.DEFINE_string('tflite_path', None, 'Path for exporting tflite file.')
 
+flags.DEFINE_integer('start_index', 1, 'Path for exporting tflite file.')
+
 FLAGS = flags.FLAGS
 
 
@@ -58,7 +60,7 @@ def main(_):
         bbox_idx = int(os.path.basename(fp).split("_")[-1])
         label_dir = os.path.basename(os.path.dirname(image_file))
         if label_dir not in label_dict:
-            cur_label = len(label_dict) + 1
+            cur_label = len(label_dict) + FLAGS.start_index
             label_dict[label_dir] = cur_label
         real_image_dict[real_file_path].append([bbox_idx, label_dict[label_dir]])
 

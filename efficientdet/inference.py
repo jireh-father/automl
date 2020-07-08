@@ -1085,7 +1085,7 @@ class InferenceDriver(object):
                             continue
                         label = labels[target_indexes.index(j)]
                         # [x, y, width, height]
-                        bbox = {"x1": box[1], "y1": box[0], "x2": box[3], "y2": box[2], "label": label}
+                        bbox = {"x1": float(box[1]), "y1": float(box[0]), "x2": float(box[3]), "y2": float(box[2]), "label": label}
                         annotations[image_fn]["bbox"].append(bbox)
                     shutil.copy(image_file, os.path.join(output_dir, "image"))
                     img = visualize_image_prediction(

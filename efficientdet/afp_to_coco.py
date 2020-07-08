@@ -113,7 +113,7 @@ if __name__ == '__main__':
         })
 
     if annotation_files:
-        for annotation_file in annotation_files.split(","):
+        for annotation_file in annotation_files:
             annotations = json.load(open(annotation_files))
             for image_fn in annotations:
                 annotation = annotations[image_fn]

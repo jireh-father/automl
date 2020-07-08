@@ -85,6 +85,7 @@ Then you will get:
 
 Notably, --tflite_path only works after 2.3.0-dev20200521
 
+### converting ckpt model to tflite model
 ```bash
 python model_inspect.py \
 --runmode=saved_model \

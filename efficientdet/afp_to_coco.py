@@ -135,11 +135,12 @@ if __name__ == '__main__':
                 for bbox in annotation["bbox"]:
                     bbox_id_map[image_fn] += 1
                     coco_output["annotations"].append({
-                        "segmentation": segmentation,
-                        "area": int(area),
+                        "segmentation": [bbox["x1"], bbox["y1"], bbox["x2"], bbox["y1"], bbox["x2"], bbox["y2"],
+                                         bbox["x1"], bbox["y2"]],
+                        "area": int((bbox["x2"] - bbox["x1"]) * (bbox["y2"] - bbox["y1"])),
                         "iscrowd": 0,
                         "image_id": image_id_map[image_fn],
-                        "bbox": list(bbox),
+                        "bbox": [bbox["x1"], bbox["y1"], bbox["x2"] - bbox["x1"], bbox["y2"] - bbox["y1"]],
                         "category_id": bbox["label"],
                         "id": bbox_id_map[image_fn]
                     })

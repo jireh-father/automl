@@ -978,11 +978,31 @@ class InferenceDriver(object):
         Returns:
           Annotated image.
         """
-        os.makedirs(output_dir, exist_ok=True)
         os.makedirs(os.path.join(output_dir, "vis"), exist_ok=True)
 
+        # image_file_list = glob.glob(image_image_path)
+        # real_image_dict = {}
+        # for image_file in image_file_list:
+        #     splitext = os.path.splitext(image_file)
+        #     ext = splitext[1]
+        #     fp = splitext[0]
+        #     real_file_name = "_".join(os.path.basename(fp).split("_")[:-1])
+        #     real_file_path = os.path.join(real_image_dir, real_file_name + ext)
+        #
+        #     if not os.path.isfile(real_file_path):
+        #         real_file_path = os.path.join(real_image_dir, real_file_name + ".jpeg")
+        #     if not os.path.isfile(real_file_path):
+        #         real_file_path = os.path.join(real_image_dir, real_file_name + ".png")
+        #     if not os.path.isfile(real_file_path):
+        #         real_file_path = os.path.join(real_image_dir, real_file_name + ".bmp")
+        #     if real_file_path not in real_image_dict:
+        #         real_image_dict[real_file_path] = []
+        #     real_image_dict[real_file_path].append(int(os.path.basename(fp).split("_")[-1]))
+
         image_file_list = glob.glob(image_image_path)
+        image_file_list.sort()
         real_image_dict = {}
+        label_dict = {}
         for image_file in image_file_list:
             splitext = os.path.splitext(image_file)
             ext = splitext[1]
@@ -998,7 +1018,12 @@ class InferenceDriver(object):
                 real_file_path = os.path.join(real_image_dir, real_file_name + ".bmp")
             if real_file_path not in real_image_dict:
                 real_image_dict[real_file_path] = []
-            real_image_dict[real_file_path].append(int(os.path.basename(fp).split("_")[-1]))
+            bbox_idx = int(os.path.basename(fp).split("_")[-1])
+            label_dir = os.path.basename(os.path.dirname(image_file))
+            if label_dir not in label_dict:
+                cur_label = len(label_dict) + 1
+                label_dict[label_dir] = cur_label
+            real_image_dict[real_file_path].append([bbox_idx, label_dict[label_dir]])
 
         params = copy.deepcopy(self.params)
         real_image_file_list = list(real_image_dict.keys())
@@ -1041,7 +1066,12 @@ class InferenceDriver(object):
                     classes = prediction[:, 6].astype(int)
                     # scores = prediction[:, 5]
 
-                    target_indexes = real_image_dict[image_files[i]]
+                    image_file = image_files[i]
+                    bbox_idx_and_labels = real_image_dict[image_file]
+                    print(image_file, bbox_idx_and_labels)
+                    target_indexes = [item[0] for item in bbox_idx_and_labels]
+                    labels = [item[1] for item in bbox_idx_and_labels]
+
                     image_fn = os.path.basename(image_files[i])
                     width, height = raw_images[i].size
                     annotations[image_fn] = {"width": width, "height": height, "bbox": []}
@@ -1050,9 +1080,9 @@ class InferenceDriver(object):
                             continue
                         if classes[j] != 1:
                             continue
-
+                        label = labels[target_indexes.index(j)]
                         # [x, y, width, height]
-                        bbox = {"x1": box[1], "y1": box[0], "x2": box[3], "y2": box[2]}
+                        bbox = {"x1": box[1], "y1": box[0], "x2": box[3], "y2": box[2], "label": label}
                         annotations[image_fn]["bbox"].append(bbox)
 
                     img = visualize_image_prediction(

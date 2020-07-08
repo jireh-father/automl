@@ -886,7 +886,7 @@ class InferenceDriver(object):
 
             return predictions
 
-    def inference_and_crop(self, image_image_path: str, output_dir: Text, batch_size: int, **kwargs):
+    def inference_and_crop(self, image_image_path: str, output_dir: Text, batch_size: int, target_label_idx: int,**kwargs):
         """Read and preprocess input images.
 
         Args:
@@ -904,7 +904,6 @@ class InferenceDriver(object):
         os.makedirs(os.path.join(output_dir, "crop"), exist_ok=True)
         os.makedirs(os.path.join(output_dir, "vis"), exist_ok=True)
 
-        target_label_idx = kwargs.get('target_label_idx')
         image_file_list = glob.glob(image_image_path)
         steps = math.ceil(len(image_file_list) / batch_size)
         params = copy.deepcopy(self.params)

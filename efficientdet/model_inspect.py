@@ -258,11 +258,11 @@ class ModelInspector(object):
                                            self.model_config.as_dict())
         driver.inference(image_image_path, output_dir, **kwargs)
 
-    def inference_and_crop(self, image_image_path, output_dir, **kwargs):
+    def inference_and_crop(self, image_image_path, output_dir, target_label_idx, **kwargs):
         os.makedirs(output_dir, exist_ok=True)
         driver = inference.InferenceDriver(self.model_name, self.ckpt_path,
                                            self.model_config.as_dict())
-        driver.inference_and_crop(image_image_path, output_dir, self.batch_size, **kwargs)
+        driver.inference_and_crop(image_image_path, output_dir, self.batch_size, target_label_idx, **kwargs)
 
     def inference_and_extract(self, image_image_path, output_dir, real_image_dir, **kwargs):
         os.makedirs(output_dir, exist_ok=True)
@@ -458,8 +458,7 @@ class ModelInspector(object):
                 self.inference_single_image(kwargs['input_image'],
                                             kwargs['output_image_dir'], **config_dict)
             elif runmode == 'infer_and_crop':
-                config_dict['target_label_idx'] = kwargs.get('target_label_idx')
-                self.inference_and_crop(kwargs['input_image'], kwargs['output_image_dir'], **config_dict)
+                self.inference_and_crop(kwargs['input_image'], kwargs['output_image_dir'], kwargs.get('target_label_idx'), **config_dict)
             elif runmode == 'infer_and_extract':
                 self.inference_and_extract(kwargs['input_image'], kwargs['output_image_dir'], kwargs['real_image_dir'], **config_dict)
             elif runmode == 'saved_model_infer':

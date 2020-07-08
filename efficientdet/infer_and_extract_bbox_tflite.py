@@ -55,7 +55,7 @@ def main(_):
         bbox_idx = int(os.path.basename(fp).split("_")[-1])
         label_dir = os.path.basename(os.path.dirname(image_file))
         if label_dir not in label_dict:
-            cur_label = len(label_dict) + 2
+            cur_label = len(label_dict) + 1
             label_dict[label_dir] = cur_label
         real_image_dict[real_file_path].append([bbox_idx, label_dict[label_dir]])
 

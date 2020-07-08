@@ -71,6 +71,9 @@ flags.DEFINE_integer('line_thickness', None, 'Line thickness for box.')
 flags.DEFINE_integer('max_boxes_to_draw', None, 'Max number of boxes to draw.')
 flags.DEFINE_float('min_score_thresh', None, 'Score threshold to show box.')
 
+flags.DEFINE_integer('target_label_idx', 1, 'Max number of boxes to draw.')
+
+
 # For saved model.
 flags.DEFINE_string('saved_model_dir', '/tmp/saved_model',
                     'Folder path for saved model.')
@@ -455,6 +458,7 @@ class ModelInspector(object):
                 self.inference_single_image(kwargs['input_image'],
                                             kwargs['output_image_dir'], **config_dict)
             elif runmode == 'infer_and_crop':
+                config_dict['target_label_idx'] = kwargs.get('target_label_idx')
                 self.inference_and_crop(kwargs['input_image'], kwargs['output_image_dir'], **config_dict)
             elif runmode == 'infer_and_extract':
                 self.inference_and_extract(kwargs['input_image'], kwargs['output_image_dir'], kwargs['real_image_dir'], **config_dict)
@@ -502,7 +506,8 @@ def main(_):
         bm_runs=FLAGS.bm_runs,
         threads=FLAGS.threads,
         trace_filename=FLAGS.trace_filename,
-        real_image_dir=FLAGS.real_image_dir)
+        real_image_dir=FLAGS.real_image_dir,
+        target_label_idx=FLAGS.target_label_idx)
 
 
 if __name__ == '__main__':

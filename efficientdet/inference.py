@@ -904,6 +904,7 @@ class InferenceDriver(object):
         os.makedirs(os.path.join(output_dir, "crop"), exist_ok=True)
         os.makedirs(os.path.join(output_dir, "vis"), exist_ok=True)
 
+        target_label_idx = kwargs.get('target_label_idx')
         image_file_list = glob.glob(image_image_path)
         steps = math.ceil(len(image_file_list) / batch_size)
         params = copy.deepcopy(self.params)
@@ -946,7 +947,7 @@ class InferenceDriver(object):
                     im = Image.open(image_files[i]).convert("RGB")
                     print(image_files[i])
                     for j, box in enumerate(boxes):
-                        if classes[j] != 1:
+                        if classes[j] != target_label_idx:
                             continue
                         # [x, y, width, height]
                         print(im.size)

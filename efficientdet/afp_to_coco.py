@@ -137,7 +137,7 @@ if __name__ == '__main__':
                     coco_output["annotations"].append({
                         "segmentation": [bbox["x1"], bbox["y1"], bbox["x2"], bbox["y1"], bbox["x2"], bbox["y2"],
                                          bbox["x1"], bbox["y2"]],
-                        "area": int((bbox["x2"] - bbox["x1"]) * (bbox["y2"] - bbox["y1"])),
+                        "area": (bbox["x2"] - bbox["x1"]) * (bbox["y2"] - bbox["y1"]),
                         "iscrowd": 0,
                         "image_id": image_id_map[image_fn],
                         "bbox": [bbox["x1"], bbox["y1"], bbox["x2"] - bbox["x1"], bbox["y2"] - bbox["y1"]],

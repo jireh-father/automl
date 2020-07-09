@@ -35,13 +35,15 @@ def main(_):
     input_shape = input_details[0]['shape']
 
     image_file_list = glob.glob(FLAGS.input_image)
+    image_dirs = glob.glob(os.path.dirname(FLAGS.input_image))
+    image_dirs.sort()
+    label_dict = {os.path.basename(dname): i + FLAGS.start_index for i, dname in enumerate(image_dirs)}
     image_file_list.sort()
     if os.path.dirname(FLAGS.output_path):
         os.makedirs(os.path.dirname(FLAGS.output_path), exist_ok=True)
     os.makedirs(FLAGS.output_image_dir, exist_ok=True)
     os.makedirs(FLAGS.vis_image_dir, exist_ok=True)
     real_image_dict = {}
-    label_dict = {}
     for image_file in image_file_list:
         splitext = os.path.splitext(image_file)
         ext = splitext[1]
@@ -59,9 +61,6 @@ def main(_):
             real_image_dict[real_file_path] = []
         bbox_idx = int(os.path.basename(fp).split("_")[-1])
         label_dir = os.path.basename(os.path.dirname(image_file))
-        if label_dir not in label_dict:
-            cur_label = len(label_dict) + FLAGS.start_index
-            label_dict[label_dir] = cur_label
         real_image_dict[real_file_path].append([bbox_idx, label_dict[label_dir]])
 
     annotations = {}

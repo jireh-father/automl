@@ -1004,6 +1004,11 @@ class InferenceDriver(object):
 
         image_file_list = glob.glob(image_image_path)
         image_file_list.sort()
+
+        image_dirs = glob.glob(os.path.dirname(image_image_path))
+        image_dirs.sort()
+        label_dict = {os.path.basename(dname): i + 1 for i, dname in enumerate(image_dirs)}
+
         real_image_dict = {}
         label_dict = {}
         for image_file in image_file_list:
@@ -1023,9 +1028,6 @@ class InferenceDriver(object):
                 real_image_dict[real_file_path] = []
             bbox_idx = int(os.path.basename(fp).split("_")[-1])
             label_dir = os.path.basename(os.path.dirname(image_file))
-            if label_dir not in label_dict:
-                cur_label = len(label_dict) + 1
-                label_dict[label_dir] = cur_label
             real_image_dict[real_file_path].append([bbox_idx, label_dict[label_dir]])
 
         params = copy.deepcopy(self.params)

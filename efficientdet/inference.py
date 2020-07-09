@@ -1079,6 +1079,7 @@ class InferenceDriver(object):
                     image_fn = os.path.basename(image_files[i])
                     width, height = raw_images[i].size
                     annotations[image_fn] = {"width": width, "height": height, "bbox": []}
+                    inserted = False
                     for j, box in enumerate(boxes):
                         if j not in target_indexes:
                             continue
@@ -1089,14 +1090,17 @@ class InferenceDriver(object):
                         bbox = {"x1": float(box[1]), "y1": float(box[0]), "x2": float(box[3]), "y2": float(box[2]),
                                 "label": label}
                         annotations[image_fn]["bbox"].append(bbox)
-                    shutil.copy(image_file, os.path.join(output_dir, "image"))
-                    img = visualize_image_prediction(
-                        raw_images[i],
-                        prediction[target_indexes],
-                        disable_pyfun=self.disable_pyfun,
-                        label_id_mapping=self.label_id_mapping,
-                        **kwargs)
-                    output_image_path = os.path.join(output_dir, "vis", str(i) + '.jpg')
-                    Image.fromarray(img).save(output_image_path)
+                        inserted = True
+                    if inserted:
+                        shutil.copy(image_file, os.path.join(output_dir, "image"))
+                        img = visualize_image_prediction(
+                            raw_images[i],
+                            prediction[target_indexes],
+                            disable_pyfun=self.disable_pyfun,
+                            label_id_mapping=self.label_id_mapping,
+                            **kwargs)
+                        vis_file_name = os.path.splitext(os.path.basename(image_file))[0] + "_" + str(step)
+                        output_image_path = os.path.join(output_dir, "vis", vis_file_name + '.jpg')
+                        Image.fromarray(img).save(output_image_path)
             tf.compat.v1.reset_default_graph()
         json.dump(annotations, open(os.path.join(output_dir, "annotation.json"), "w+"))

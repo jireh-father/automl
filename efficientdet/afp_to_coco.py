@@ -66,7 +66,9 @@ if __name__ == '__main__':
                    "category_id": 1,
                    "id": 1}
 
-    polygon_files = glob.glob(os.path.join(args.image_dir, "*.xy"))
+    polygon_files = []
+    if args.image_dir:
+        polygon_files = glob.glob(os.path.join(args.image_dir, "*.xy"))
     for i, polygon_file in enumerate(polygon_files):
         image_file = os.path.splitext(polygon_file)[0]
         if not os.path.isfile(image_file):

@@ -45,7 +45,6 @@ import math
 import json
 import shutil
 
-
 coco_id_mapping = {
     1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorcycle', 5: 'airplane',
     6: 'bus', 7: 'train', 8: 'truck', 9: 'boat', 10: 'traffic light',
@@ -886,7 +885,8 @@ class InferenceDriver(object):
 
             return predictions
 
-    def inference_and_crop(self, image_image_path: str, output_dir: Text, batch_size: int, target_label_idx: int,**kwargs):
+    def inference_and_crop(self, image_image_path: str, output_dir: Text, batch_size: int, target_label_idx: int,
+                           **kwargs):
         """Read and preprocess input images.
 
         Args:
@@ -899,7 +899,6 @@ class InferenceDriver(object):
         Returns:
           Annotated image.
         """
-
 
         os.makedirs(os.path.join(output_dir, "crop"), exist_ok=True)
         os.makedirs(os.path.join(output_dir, "vis"), exist_ok=True)
@@ -966,7 +965,8 @@ class InferenceDriver(object):
                     Image.fromarray(img).save(output_image_path)
             tf.compat.v1.reset_default_graph()
 
-    def inference_and_extract(self, image_image_path: str, output_dir: Text, real_image_dir: Text, batch_size: int,
+    def inference_and_extract(self, image_image_path: str, output_dir: Text, real_image_dir: Text, label_dir: Text,
+                              start_index: int, batch_size: int,
                               **kwargs):
         """Read and preprocess input images.
 
@@ -1005,12 +1005,11 @@ class InferenceDriver(object):
         image_file_list = glob.glob(image_image_path)
         image_file_list.sort()
 
-        image_dirs = glob.glob(os.path.dirname(image_image_path))
-        image_dirs.sort()
-        label_dict = {os.path.basename(dname): i + 1 for i, dname in enumerate(image_dirs)}
+        label_dirs = glob.glob(os.path.join(label_dir, "*"))
+        label_dirs.sort()
+        label_dict = {os.path.basename(dname): i + start_index for i, dname in enumerate(label_dirs)}
 
         real_image_dict = {}
-        label_dict = {}
         for image_file in image_file_list:
             splitext = os.path.splitext(image_file)
             ext = splitext[1]
@@ -1087,7 +1086,8 @@ class InferenceDriver(object):
                             continue
                         label = labels[target_indexes.index(j)]
                         # [x, y, width, height]
-                        bbox = {"x1": float(box[1]), "y1": float(box[0]), "x2": float(box[3]), "y2": float(box[2]), "label": label}
+                        bbox = {"x1": float(box[1]), "y1": float(box[0]), "x2": float(box[3]), "y2": float(box[2]),
+                                "label": label}
                         annotations[image_fn]["bbox"].append(bbox)
                     shutil.copy(image_file, os.path.join(output_dir, "image"))
                     img = visualize_image_prediction(

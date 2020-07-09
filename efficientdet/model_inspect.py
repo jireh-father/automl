@@ -71,8 +71,10 @@ flags.DEFINE_integer('line_thickness', None, 'Line thickness for box.')
 flags.DEFINE_integer('max_boxes_to_draw', None, 'Max number of boxes to draw.')
 flags.DEFINE_float('min_score_thresh', None, 'Score threshold to show box.')
 
+flags.DEFINE_string('label_dir', None, 'Input video path for inference.')
 flags.DEFINE_integer('target_label_idx', 1, 'Max number of boxes to draw.')
 
+flags.DEFINE_integer('start_index', 1, 'Max number of boxes to draw.')
 
 # For saved model.
 flags.DEFINE_string('saved_model_dir', '/tmp/saved_model',
@@ -264,11 +266,13 @@ class ModelInspector(object):
                                            self.model_config.as_dict())
         driver.inference_and_crop(image_image_path, output_dir, self.batch_size, target_label_idx, **kwargs)
 
-    def inference_and_extract(self, image_image_path, output_dir, real_image_dir, **kwargs):
+    def inference_and_extract(self, image_image_path, output_dir, real_image_dir, label_dir,
+                              start_index, **kwargs):
         os.makedirs(output_dir, exist_ok=True)
         driver = inference.InferenceDriver(self.model_name, self.ckpt_path,
                                            self.model_config.as_dict())
-        driver.inference_and_extract(image_image_path, output_dir, real_image_dir, self.batch_size, **kwargs)
+        driver.inference_and_extract(image_image_path, output_dir, real_image_dir, label_dir,
+                                     start_index, self.batch_size, **kwargs)
 
     def build_and_save_model(self):
         """build and save the model into self.logdir."""
@@ -458,9 +462,11 @@ class ModelInspector(object):
                 self.inference_single_image(kwargs['input_image'],
                                             kwargs['output_image_dir'], **config_dict)
             elif runmode == 'infer_and_crop':
-                self.inference_and_crop(kwargs['input_image'], kwargs['output_image_dir'], kwargs.get('target_label_idx'), **config_dict)
+                self.inference_and_crop(kwargs['input_image'], kwargs['output_image_dir'],
+                                        kwargs.get('target_label_idx'), **config_dict)
             elif runmode == 'infer_and_extract':
-                self.inference_and_extract(kwargs['input_image'], kwargs['output_image_dir'], kwargs['real_image_dir'], **config_dict)
+                self.inference_and_extract(kwargs['input_image'], kwargs['output_image_dir'], kwargs['real_image_dir'],
+                                           kwargs['label_dir'], kwargs['start_index'], **config_dict)
             elif runmode == 'saved_model_infer':
                 self.saved_model_inference(kwargs['input_image'],
                                            kwargs['output_image_dir'], **config_dict)

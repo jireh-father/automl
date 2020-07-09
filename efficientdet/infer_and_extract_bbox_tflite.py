@@ -10,6 +10,7 @@ import shutil
 import json
 
 flags.DEFINE_string('input_image', None, 'Input image path for inference.')
+flags.DEFINE_string('label_dir', None, 'Input image path for inference.')
 flags.DEFINE_string('output_path', None, 'Output dir for inference.')
 flags.DEFINE_string('output_image_dir', None, 'Output dir for inference.')
 flags.DEFINE_string('vis_image_dir', None, 'Output dir for inference.')
@@ -35,9 +36,9 @@ def main(_):
     input_shape = input_details[0]['shape']
 
     image_file_list = glob.glob(FLAGS.input_image)
-    image_dirs = glob.glob(os.path.dirname(FLAGS.input_image))
-    image_dirs.sort()
-    label_dict = {os.path.basename(dname): i + FLAGS.start_index for i, dname in enumerate(image_dirs)}
+    label_dirs = glob.glob(os.path.join(FLAGS.label_dir, "*"))
+    label_dirs.sort()
+    label_dict = {os.path.basename(dname): i + FLAGS.start_index for i, dname in enumerate(label_dirs)}
     image_file_list.sort()
     if os.path.dirname(FLAGS.output_path):
         os.makedirs(os.path.dirname(FLAGS.output_path), exist_ok=True)

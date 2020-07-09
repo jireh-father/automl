@@ -512,7 +512,9 @@ def main(_):
         threads=FLAGS.threads,
         trace_filename=FLAGS.trace_filename,
         real_image_dir=FLAGS.real_image_dir,
-        target_label_idx=FLAGS.target_label_idx)
+        target_label_idx=FLAGS.target_label_idx,
+        label_dir=FLAGS.label_dir,
+        start_index=FLAGS.start_index)
 
 
 if __name__ == '__main__':

@@ -13,6 +13,8 @@ def parse_args():
     parser.add_argument('--image_dir', dest='image_dir', default=None, type=str)
     parser.add_argument('--annotation_files', dest='annotation_files', default=None, type=str)
     parser.add_argument('--output_path', dest='output_path', default=None, type=str)
+
+    parser.add_argument('--label_dir', dest='label_dir', default=None, type=str)
     # parser.add_argument('--output_image_dir', dest='output_image_dir', default=None, type=str)
     if len(sys.argv) == 1:
         parser.print_help()
@@ -20,7 +22,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def init_coco_annotation():
+def init_coco_annotation(label_dir):
     coco_output = {}
     coco_output["info"] = {
         "description": "This is stable 1.0 version of the 2014 MS COCO dataset.",
@@ -39,15 +41,13 @@ def init_coco_annotation():
     coco_output["images"] = []
 
     coco_output["annotations"] = []
-    coco_output["categories"] = [{
-        "supercategory": "eye",
-        "id": 1,
-        "name": "eye"
-    }, {
-        "supercategory": "not_eye",
-        "id": 2,
-        "name": "not_eye"
-    }, ]
+
+    label_dirs = glob.glob(os.path.join(label_dir, "*"))
+    label_dirs.sort()
+
+    coco_output["categories"] = [
+        {"supercategory": os.path.basename(dname), "id": i + 1, "name": os.path.basename(dname)} for i, dname
+        in enumerate(label_dirs)]
     return coco_output
 
 
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     else:
         annotation_files = None
 
-    coco_output = init_coco_annotation()
+    coco_output = init_coco_annotation(args.label_dir)
     image_id_map = {}
     bbox_id_map = {}
     anno_sample = {"segmentation": [],

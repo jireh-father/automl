@@ -17,7 +17,7 @@ flags.DEFINE_string('vis_image_dir', None, 'Output dir for inference.')
 flags.DEFINE_string('real_image_dir', None, 'Output dir for inference.')
 
 flags.DEFINE_float('min_score_thresh', 0.3, 'Score threshold to show box.')
-flags.DEFINE_integer('target_label_idx', 1, 'Score threshold to show box.')
+flags.DEFINE_integer('target_label_idx', None, 'Score threshold to show box.')
 
 flags.DEFINE_string('tflite_path', None, 'Path for exporting tflite file.')
 
@@ -86,7 +86,11 @@ def main(_):
         total_exec_time += exec_time
         r_h = input_shape[1]
         r_w = input_shape[2]
-        eye_indexes = np.squeeze(np.argwhere(output_data[0, :, 6] == FLAGS.target_label_idx), 1)
+        if FLAGS.target_label_idx is not None:
+            eye_indexes = np.squeeze(np.argwhere(output_data[0, :, 6] == FLAGS.target_label_idx), 1)
+            eye_indexes = np.squeeze(np.argwhere(output_data[0][eye_indexes][:, 5] > 0.), 1)
+        else:
+            eye_indexes = np.squeeze(np.argwhere(output_data[0, :, 5] > 0.), 1)
         if len(eye_indexes) > 0:
             top_k = 30
             top_k_indexes = output_data[0][eye_indexes][:, 5].argsort()[::-1][:top_k]

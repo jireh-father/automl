@@ -55,13 +55,6 @@ if __name__ == '__main__':
     args = parse_args()
     os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
     # os.makedirs(args.output_image_dir, exist_ok=True)
-
-    polygon_files = glob.glob(os.path.join(args.image_dir, "*.xy"))
-    if args.annotation_files:
-        annotation_files = args.annotation_files.split(",")
-    else:
-        annotation_files = None
-
     coco_output = init_coco_annotation(args.label_dir)
     image_id_map = {}
     bbox_id_map = {}
@@ -73,6 +66,7 @@ if __name__ == '__main__':
                    "category_id": 1,
                    "id": 1}
 
+    polygon_files = glob.glob(os.path.join(args.image_dir, "*.xy"))
     for i, polygon_file in enumerate(polygon_files):
         image_file = os.path.splitext(polygon_file)[0]
         if not os.path.isfile(image_file):
@@ -112,6 +106,10 @@ if __name__ == '__main__':
             "id": image_id_map[image_fn]
         })
 
+    if args.annotation_files:
+        annotation_files = args.annotation_files.split(",")
+    else:
+        annotation_files = None
     if annotation_files:
         for annotation_file in annotation_files:
             annotations = json.load(open(annotation_file))

@@ -7,7 +7,7 @@ import shutil
 flags.DEFINE_string('image_dir', None, 'Input image path for inference.')
 flags.DEFINE_string('output_image_dir', None, 'Output dir for inference.')
 
-flags.DEFINE_float('target_nums_image', 6697, 'Score threshold to show box.')
+flags.DEFINE_integer('target_nums_image', 6697, 'Score threshold to show box.')
 
 FLAGS = flags.FLAGS
 
@@ -25,6 +25,7 @@ def main(_):
         image_files = glob.glob(os.path.join(image_dir, "*"))
         output_dir = os.path.join(FLAGS.output_image_dir, os.path.basename(image_dir))
         os.makedirs(output_dir, exist_ok=True)
+        print(len(image_files), target_nums_image)
         if len(image_files) >= target_nums_image:
             for image_file in image_files:
                 shutil.copy(image_file, output_dir)

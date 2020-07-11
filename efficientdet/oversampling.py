@@ -30,7 +30,7 @@ def main(_):
                 shutil.copy(image_file, output_dir)
             print("copy completed not oversampled")
         else:
-            cp_cnt = target_nums_image - len(image_files)
+            cp_cnt = target_nums_image
             while True:
                 for image_file in image_files:
                     if cp_cnt < 1:

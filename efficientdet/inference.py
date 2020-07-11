@@ -1090,6 +1090,8 @@ class InferenceDriver(object):
                     for j, bbox_idx in enumerate(target_indexes):
                         if bbox_idx >= len(boxes):
                             raise Exception("invalid bbox index!", bbox_idx, boxes)
+                        if classes[bbox_idx] != 1:
+                            raise Exception("invalid bbox index in classes!", bbox_idx, classes)
                         box = boxes[bbox_idx]
                         bbox = {"x1": float(box[1]), "y1": float(box[0]), "x2": float(box[3]), "y2": float(box[2]),
                                 "label": labels[j]}

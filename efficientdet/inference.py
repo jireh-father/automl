@@ -44,6 +44,7 @@ import glob
 import math
 import json
 import shutil
+import random
 
 coco_id_mapping = {
     1: 'person', 2: 'bicycle', 3: 'car', 4: 'motorcycle', 5: 'airplane',
@@ -966,7 +967,8 @@ class InferenceDriver(object):
             tf.compat.v1.reset_default_graph()
 
     def inference_and_extract(self, image_image_path: str, output_dir: Text, real_image_dir: Text, label_dir: Text,
-                              start_index: int, batch_size: int,
+                              start_index: int, batch_size: int, random_seed: int, use_bbox_aug: bool,
+                              bbox_aug_ratio: float,
                               **kwargs):
         """Read and preprocess input images.
 
@@ -1001,6 +1003,9 @@ class InferenceDriver(object):
         #     if real_file_path not in real_image_dict:
         #         real_image_dict[real_file_path] = []
         #     real_image_dict[real_file_path].append(int(os.path.basename(fp).split("_")[-1]))
+
+        if random_seed:
+            random.seed(random_seed)
 
         image_file_list = glob.glob(image_image_path)
         image_file_list.sort()
@@ -1087,6 +1092,11 @@ class InferenceDriver(object):
                     annotations[image_fn] = {"width": width, "height": height, "bbox": []}
                     inserted = False
 
+                    dup_idx = False
+                    if len(set(target_indexes)) < len(target_indexes):
+                        dup_idx = True
+                    bbox_idx_map = {}
+
                     for j, bbox_idx in enumerate(target_indexes):
                         if bbox_idx >= len(boxes):
                             raise Exception("invalid bbox index!", bbox_idx, boxes)
@@ -1095,6 +1105,19 @@ class InferenceDriver(object):
                         box = boxes[bbox_idx]
                         bbox = {"x1": float(box[1]), "y1": float(box[0]), "x2": float(box[3]), "y2": float(box[2]),
                                 "label": labels[j]}
+                        if dup_idx and use_bbox_aug and bbox_idx in bbox_idx_map:
+                            w = bbox["x2"] - bbox["x1"]
+                            h = bbox["y2"] - bbox["y1"]
+                            w_aug_max = round(w * bbox_aug_ratio)
+                            h_aug_max = round(h * bbox_aug_ratio)
+                            x1_aug = random.randint(0, w_aug_max) - (w_aug_max // 2)
+                            x2_aug = random.randint(0, w_aug_max) - (w_aug_max // 2)
+                            y1_aug = random.randint(0, h_aug_max) - (h_aug_max // 2)
+                            y2_aug = random.randint(0, h_aug_max) - (h_aug_max // 2)
+                            bbox["x1"] += x1_aug
+                            bbox["x2"] += x2_aug
+                            bbox["y1"] += y1_aug
+                            bbox["y2"] += y2_aug
                         annotations[image_fn]["bbox"].append(bbox)
                         inserted = True
 

@@ -8,6 +8,7 @@ from PIL import Image
 import os
 import shutil
 import json
+import random
 
 flags.DEFINE_string('input_image', None, 'Input image path for inference.')
 flags.DEFINE_string('label_dir', None, 'Input image path for inference.')
@@ -22,6 +23,10 @@ flags.DEFINE_integer('target_label_idx', None, 'Score threshold to show box.')
 flags.DEFINE_string('tflite_path', None, 'Path for exporting tflite file.')
 
 flags.DEFINE_integer('start_index', 1, 'Path for exporting tflite file.')
+flags.DEFINE_integer('random_seed', 1, 'Path for exporting tflite file.')
+
+flags.DEFINE_boolean('use_bbox_aug', False, 'Path for exporting tflite file.')
+flags.DEFINE_float('bbox_aug_ratio', 0.1, 'Path for exporting tflite file.')
 
 FLAGS = flags.FLAGS
 
@@ -30,6 +35,9 @@ def main(_):
     model_path = FLAGS.tflite_path
     interpreter = tf.lite.Interpreter(model_path=model_path)
     interpreter.allocate_tensors()
+
+    if FLAGS.random_seed:
+        random.seed(FLAGS.random_seed)
 
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
@@ -124,11 +132,30 @@ def main(_):
             if eyes_bboxes:
                 if not os.path.isfile(os.path.join(FLAGS.output_image_dir, os.path.basename(image_file))):
                     shutil.copy(image_file, FLAGS.output_image_dir)
+                dup_idx = False
+                if len(set(bbox_idxs)) < len(bbox_idxs):
+                    dup_idx = True
+                bbox_idx_map = {}
                 for j, bbox_idx in enumerate(bbox_idxs):
                     if bbox_idx >= len(eyes_bboxes):
                         raise Exception("invalid bbox index!", bbox_idx, eyes_bboxes)
                     bbox = eyes_bboxes[bbox_idx]
                     bbox["label"] = labels[j]
+                    if dup_idx and FLAGS.use_bbox_aug and bbox_idx in bbox_idx_map:
+                        w = bbox["x2"] - bbox["x1"]
+                        h = bbox["y2"] - bbox["y1"]
+                        w_aug_max = round(w * FLAGS.bbox_aug_ratio)
+                        h_aug_max = round(h * FLAGS.bbox_aug_ratio)
+                        x1_aug = random.randint(0, w_aug_max) - (w_aug_max // 2)
+                        x2_aug = random.randint(0, w_aug_max) - (w_aug_max // 2)
+                        y1_aug = random.randint(0, h_aug_max) - (h_aug_max // 2)
+                        y2_aug = random.randint(0, h_aug_max) - (h_aug_max // 2)
+                        bbox["x1"] += x1_aug
+                        bbox["x2"] += x2_aug
+                        bbox["y1"] += y1_aug
+                        bbox["y2"] += y2_aug
+                    bbox_idx_map[bbox_idx] = True
+
                     annotations[image_fn]["bbox"].append(bbox)
         else:
             print("no eyes")

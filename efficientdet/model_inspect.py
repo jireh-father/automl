@@ -76,6 +76,10 @@ flags.DEFINE_integer('target_label_idx', 1, 'Max number of boxes to draw.')
 
 flags.DEFINE_integer('start_index', 1, 'Max number of boxes to draw.')
 
+flags.DEFINE_integer('random_seed', 1, 'Max number of boxes to draw.')
+flags.DEFINE_boolean('use_bbox_aug', False, 'Max number of boxes to draw.')
+flags.DEFINE_float('bbox_aug_ratio', 0.1, 'Max number of boxes to draw.')
+
 # For saved model.
 flags.DEFINE_string('saved_model_dir', '/tmp/saved_model',
                     'Folder path for saved model.')
@@ -267,12 +271,12 @@ class ModelInspector(object):
         driver.inference_and_crop(image_image_path, output_dir, self.batch_size, target_label_idx, **kwargs)
 
     def inference_and_extract(self, image_image_path, output_dir, real_image_dir, label_dir,
-                              start_index, **kwargs):
+                              start_index, random_seed, use_bbox_aug, bbox_aug_ratio, **kwargs):
         os.makedirs(output_dir, exist_ok=True)
         driver = inference.InferenceDriver(self.model_name, self.ckpt_path,
                                            self.model_config.as_dict())
         driver.inference_and_extract(image_image_path, output_dir, real_image_dir, label_dir,
-                                     start_index, self.batch_size, **kwargs)
+                                     start_index, self.batch_size, random_seed, use_bbox_aug, bbox_aug_ratio, **kwargs)
 
     def build_and_save_model(self):
         """build and save the model into self.logdir."""
@@ -466,7 +470,9 @@ class ModelInspector(object):
                                         kwargs.get('target_label_idx'), **config_dict)
             elif runmode == 'infer_and_extract':
                 self.inference_and_extract(kwargs['input_image'], kwargs['output_image_dir'], kwargs['real_image_dir'],
-                                           kwargs['label_dir'], kwargs['start_index'], **config_dict)
+                                           kwargs['label_dir'], kwargs['start_index'],
+                                           kwargs['random_seed'], kwargs['use_bbox_aug'], kwargs['bbox_aug_ratio'],
+                                           **config_dict)
             elif runmode == 'saved_model_infer':
                 self.saved_model_inference(kwargs['input_image'],
                                            kwargs['output_image_dir'], **config_dict)
@@ -514,7 +520,10 @@ def main(_):
         real_image_dir=FLAGS.real_image_dir,
         target_label_idx=FLAGS.target_label_idx,
         label_dir=FLAGS.label_dir,
-        start_index=FLAGS.start_index)
+        start_index=FLAGS.start_index,
+        random_seed=FLAGS.random_seed,
+        use_bbox_aug=FLAGS.use_bbox_aug,
+        bbox_aug_ratio=FLAGS.bbox_aug_ratio)
 
 
 if __name__ == '__main__':

@@ -1014,17 +1014,23 @@ class InferenceDriver(object):
             splitext = os.path.splitext(image_file)
             ext = splitext[1]
             fp = splitext[0]
-            real_file_name = "_".join(os.path.basename(fp).split("_")[:-1])
-            real_file_path = os.path.join(real_image_dir, real_file_name + ext)
 
-            if not os.path.isfile(real_file_path):
-                real_file_path = os.path.join(real_image_dir, real_file_name + ".jpeg")
-            if not os.path.isfile(real_file_path):
-                real_file_path = os.path.join(real_image_dir, real_file_name + ".png")
-            if not os.path.isfile(real_file_path):
-                real_file_path = os.path.join(real_image_dir, real_file_name + ".bmp")
-            if real_file_path not in real_image_dict:
-                real_image_dict[real_file_path] = []
+            real_file_name = "_".join(os.path.basename(fp).split("_")[1:-1])
+            searched = glob.glob(os.path.join(real_image_dir, real_file_name + ".*"))
+            if len(searched) == 1:
+                real_file_path = searched[0]
+            else:
+                real_file_name = "_".join(os.path.basename(fp).split("_")[:-1])
+                real_file_path = os.path.join(real_image_dir, real_file_name + ext)
+
+                if not os.path.isfile(real_file_path):
+                    real_file_path = os.path.join(real_image_dir, real_file_name + ".jpeg")
+                if not os.path.isfile(real_file_path):
+                    real_file_path = os.path.join(real_image_dir, real_file_name + ".png")
+                if not os.path.isfile(real_file_path):
+                    real_file_path = os.path.join(real_image_dir, real_file_name + ".bmp")
+                if real_file_path not in real_image_dict:
+                    real_image_dict[real_file_path] = []
             bbox_idx = int(os.path.basename(fp).split("_")[-1])
             label_dir = os.path.basename(os.path.dirname(image_file))
             real_image_dict[real_file_path].append([bbox_idx, label_dict[label_dir]])
@@ -1080,17 +1086,27 @@ class InferenceDriver(object):
                     width, height = raw_images[i].size
                     annotations[image_fn] = {"width": width, "height": height, "bbox": []}
                     inserted = False
-                    for j, box in enumerate(boxes):
-                        if j not in target_indexes:
-                            continue
-                        if classes[j] != 1:
-                            continue
-                        label = labels[target_indexes.index(j)]
-                        # [x, y, width, height]
+
+                    for j, bbox_idx in enumerate(target_indexes):
+                        if bbox_idx >= len(boxes):
+                            raise Exception("invalid bbox index!", bbox_idx, boxes)
+                        box = boxes[bbox_idx]
                         bbox = {"x1": float(box[1]), "y1": float(box[0]), "x2": float(box[3]), "y2": float(box[2]),
-                                "label": label}
+                                "label": labels[j]}
                         annotations[image_fn]["bbox"].append(bbox)
                         inserted = True
+
+                    # for j, box in enumerate(boxes):
+                    #     if j not in target_indexes:
+                    #         continue
+                    #     if classes[j] != 1:
+                    #         continue
+                    #     label = labels[target_indexes.index(j)]
+                    #     # [x, y, width, height]
+                    #     bbox = {"x1": float(box[1]), "y1": float(box[0]), "x2": float(box[3]), "y2": float(box[2]),
+                    #             "label": label}
+                    #     annotations[image_fn]["bbox"].append(bbox)
+
                     if inserted:
                         if not os.path.isfile(
                                 os.path.join(os.path.join(output_dir, "image"), os.path.basename(image_file))):

@@ -21,7 +21,7 @@ def main(_):
 
     print("start")
     for image_dir in image_dirs:
-        print("image_dir")
+        print("image_dir", image_dir)
         image_files = glob.glob(os.path.join(image_dir, "*"))
         output_dir = os.path.join(FLAGS.output_image_dir, os.path.basename(image_dir))
         os.makedirs(output_dir, exist_ok=True)

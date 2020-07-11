@@ -1092,7 +1092,9 @@ class InferenceDriver(object):
                         annotations[image_fn]["bbox"].append(bbox)
                         inserted = True
                     if inserted:
-                        shutil.copy(image_file, os.path.join(output_dir, "image"))
+                        if not os.path.isfile(
+                                os.path.join(os.path.join(output_dir, "image"), os.path.basename(image_file))):
+                            shutil.copy(image_file, os.path.join(output_dir, "image"))
                         img = visualize_image_prediction(
                             raw_images[i],
                             prediction[target_indexes],

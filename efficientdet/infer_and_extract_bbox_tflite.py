@@ -117,7 +117,8 @@ def main(_):
 
             print(eyes_bboxes)
             if eyes_bboxes:
-                shutil.copy(image_file, FLAGS.output_image_dir)
+                if not os.path.isfile(os.path.join(FLAGS.output_image_dir, os.path.basename(image_file))):
+                    shutil.copy(image_file, FLAGS.output_image_dir)
                 for j, bbox_idx in enumerate(bbox_idxs):
                     if bbox_idx >= len(eyes_bboxes):
                         raise Exception("invalid bbox index!", bbox_idx, eyes_bboxes)

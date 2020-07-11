@@ -26,6 +26,9 @@ def main(_):
         output_dir = os.path.join(FLAGS.output_image_dir, os.path.basename(image_dir))
         os.makedirs(output_dir, exist_ok=True)
         print(len(image_files), target_nums_image)
+        if len(image_files) < 1:
+            print("empty files")
+            continue
         if len(image_files) >= target_nums_image:
             for image_file in image_files:
                 shutil.copy(image_file, output_dir)

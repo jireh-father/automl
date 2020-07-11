@@ -63,8 +63,8 @@ def main(_):
                 real_file_path = os.path.join(FLAGS.real_image_dir, real_file_name + ".png")
             if not os.path.isfile(real_file_path):
                 real_file_path = os.path.join(FLAGS.real_image_dir, real_file_name + ".bmp")
-            if real_file_path not in real_image_dict:
-                real_image_dict[real_file_path] = []
+        if real_file_path not in real_image_dict:
+            real_image_dict[real_file_path] = []
         bbox_idx = int(os.path.basename(fp).split("_")[-1])
         label_dir = os.path.basename(os.path.dirname(image_file))
         real_image_dict[real_file_path].append([bbox_idx, label_dict[label_dir]])

@@ -16,6 +16,93 @@ Updates:
 
 **Quick install dependencies: ```pip install -r requirements.txt```**
 
+## 0. Training AFP Dataset
+### AI For Pet 데이터셋 구조
+한 이미지에 강아지 눈 bbox는 한개만 존재함.
+이미지 파일명.xy파일에 눈의 segmentation 좌표정보가 있다.
+- 14_001.jpg.xy
+- 14_001.jpg
+- 14_002.jpg.xy
+- 14_002.jpg
+- ....
+
+### a. AI For Pet 데이터셋 coco annotation 형식으로 변경
+```bash
+python afp_to_coco.py --image_dir=[ai for pet 데이터셋 경로] \
+--output_path=[coco annotation파일 경로, ex: afp_coco.json]
+```
+
+### b. coco 데이터셋 tflite 형태로 변경
+#### 학습 데이터셋
+```bash
+python -m dataset.create_coco_tfrecord --image_dir=[ai for pet 데이터셋 경로] \
+--object_annotations_file=[학습용 coco annotation파일 경로] \
+--output_file_prefix=[tflite 출력 경로. ex) ./tflite/train]
+```
+
+#### validation 데이터셋
+```bash
+python -m dataset.create_coco_tfrecord --image_dir=[ai for pet 데이터셋 경로] \
+--object_annotations_file=[validation의 coco annotation파일 경로] \
+--output_file_prefix=[tflite 출력 경로. ex) ./tflite/val]
+```
+
+### c. 학습
+
+#### Create a config file for the PASCAL VOC dataset called voc_config.yaml and put this in it.
+
+      num_classes: 2
+      var_freeze_expr: '(efficientnet|fpn_cells|resample_p6)'
+      label_id_mapping: {0: background, 1: eye}
+      
+hparams_config.py 파일 default_detection_configs 함수를 참고하여
+추가적인 하이퍼파라미터를 세팅할 수 있다.
+
+#### Download a pretrained model
+아래 "2. Pretrained EfficientDet Checkpoints" 에서 원하는 모델 다운로드
+
+#### training
+```bash
+python -u main.py --mode=train_and_eval \
+--training_file_pattern=[train tfrecord디렉토리/train*.tfrecord] \
+--validation_file_pattern=[validation tfrecord디렉토리/val*.tfrecord] \
+--model_name=efficientdet-d0(기타 d1~d7 사용가능) --model_dir=[저장할 모델 디렉토리] \
+--ckpt=[다운로드한 pretrained 모델 경로, ex) ./pretrained/efficientdet-d0] \
+--train_batch_size=64 --eval_batch_size=64 --eval_samples=[eval이미지 갯수] \
+--num_examples_per_epoch=[학습이미지 갯수] \
+--num_epochs=50 --hparams=voc_config.yaml
+```
+
+### d. inference and crop bboxes by tflite model
+```bash
+python -u model_inspect.py --runmode=infer_and_crop --model_name=efficientdet-d0(기타 d1~d7 사용가능) \
+--hparams="num_classes=2" --max_boxes_to_draw=5 --min_score_thresh=[crop할 최소 score threshold, ex: 0.6] \
+--ckpt_path=[학습된 ckpt 모델 디렉토리 혹은 파일명] \
+--input_image=[테스트 이미지 경로. ex) test_image/* ] \
+--output_image_dir=[crop된 이미지 저장 디렉토리] --batch_size=256
+```
+
+### e. convert ckpt model to tflite model
+```bash
+python model_inspect.py \
+--runmode=saved_model \
+--model_name=efficientdet-d0 \
+--ckpt_path=[trained_model_ckpt_dir] \
+--saved_model_dir=[saved_model_dir] \
+--tflite_path=[tflite_output_path] \
+--hparams="num_classes=2,image_size=224"
+```
+입력 이미지 사이즈를 변경하고 싶으면 image_size=[사이즈]를 입력하면 된다.
+기본 이미지 사이즈를 사용하려면 image_size를 빼면된다.
+classs의 갯수가 변경되면 변경된 갯수를 num_classes에 입력하면 된다.
+
+### f. inference and crop bboxes by tflite model
+```bash
+python -u infer_and_crop_tflite.py --input_image=[테스트 이미지 경로. ex) test_image/* ] \
+--output_image_dir=[crop된 이미지 저장 디렉토] --min_score_thresh=[crop할 최소 score threshold, ex: 0.6] \
+--tflite_path=[tflite 모델 파일 경로]
+```
+
 ## 1. About EfficientDet Models
 
 EfficientDets are a family of object detection models, which achieve state-of-the-art 53.7mAP on COCO test-dev, yet being 4x - 9x smaller and using 13x - 42x fewer FLOPs than previous detectors. Our models also run 2x - 4x faster on GPU, and 5x - 11x faster on CPU than other detectors.

@@ -42,12 +42,19 @@ def init_coco_annotation(label_dir):
 
     coco_output["annotations"] = []
 
-    label_dirs = glob.glob(os.path.join(label_dir, "*"))
-    label_dirs.sort()
+    if label_dir is None:
+        coco_output["categories"] = [{
+            "supercategory": "eye",
+            "id": 1,
+            "name": "eye"
+        }, ]
+    else:
+        label_dirs = glob.glob(os.path.join(label_dir, "*"))
+        label_dirs.sort()
 
-    coco_output["categories"] = [
-        {"supercategory": os.path.basename(dname), "id": i + 1, "name": os.path.basename(dname)} for i, dname
-        in enumerate(label_dirs)]
+        coco_output["categories"] = [
+            {"supercategory": os.path.basename(dname), "id": i + 1, "name": os.path.basename(dname)} for i, dname
+            in enumerate(label_dirs)]
     return coco_output
 
 

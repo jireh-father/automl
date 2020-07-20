@@ -26,6 +26,11 @@ Updates:
 - 14_002.jpg
 - ....
 
+### 서버 접속 및 가상환경 활성화
+1. 서버접속
+2. source t2/bin/activate
+3. cd source/automl/efficientdet
+
 ### a. AI For Pet 데이터셋 coco annotation 형식으로 변경
 ```bash
 python afp_to_coco.py --image_dir=[ai for pet 데이터셋 경로] \

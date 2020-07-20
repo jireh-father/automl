@@ -901,8 +901,13 @@ class InferenceDriver(object):
           Annotated image.
         """
 
-        os.makedirs(os.path.join(output_dir, "crop"), exist_ok=True)
-        os.makedirs(os.path.join(output_dir, "vis"), exist_ok=True)
+        crop_dir = os.path.join(output_dir, "crop")
+        detected_dir = os.path.join(output_dir, "detected")
+        no_detecte_dir = os.path.join(output_dir, "no_detected")
+
+        os.makedirs(crop_dir, exist_ok=True)
+        os.makedirs(detected_dir, exist_ok=True)
+        os.makedirs(no_detecte_dir, exist_ok=True)
 
         image_file_list = glob.glob(image_image_path)
         steps = math.ceil(len(image_file_list) / batch_size)
@@ -945,25 +950,31 @@ class InferenceDriver(object):
                     # scores = prediction[:, 5]
                     im = Image.open(image_files[i]).convert("RGB")
                     print(image_files[i])
+                    bbox_cnt = 0
                     for j, box in enumerate(boxes):
                         if classes[j] != target_label_idx:
                             continue
                         # [x, y, width, height]
+                        bbox_cnt += 1
                         print(im.size)
                         print(box)
                         crop_im = im.crop((box[1], box[0], box[3], box[2]))
                         image_file_name = os.path.splitext(os.path.basename(image_files[i]))[0]
-                        output_image_path = os.path.join(output_dir, "crop", "{}_{}.jpg".format(image_file_name, j))
+                        output_image_path = os.path.join(crop_dir, "{}_{}.jpg".format(image_file_name, j))
                         crop_im.save(output_image_path)
 
-                    img = visualize_image_prediction(
-                        raw_images[i],
-                        prediction,
-                        disable_pyfun=self.disable_pyfun,
-                        label_id_mapping=self.label_id_mapping,
-                        **kwargs)
-                    output_image_path = os.path.join(output_dir, "vis", str(i) + '.jpg')
-                    Image.fromarray(img).save(output_image_path)
+                    if bbox_cnt > 0:
+                        img = visualize_image_prediction(
+                            raw_images[i],
+                            prediction,
+                            disable_pyfun=self.disable_pyfun,
+                            label_id_mapping=self.label_id_mapping,
+                            **kwargs)
+                        output_image_path = os.path.join(detected_dir, str(i) + '.jpg')
+                        Image.fromarray(img).save(output_image_path)
+                    else:
+                        shutil.copy(image_files[i], no_detecte_dir)
+
             tf.compat.v1.reset_default_graph()
 
     def inference_and_extract(self, image_image_path: str, output_dir: Text, real_image_dir: Text, label_dir: Text,

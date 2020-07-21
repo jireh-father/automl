@@ -696,7 +696,7 @@ class ServingDriver(object):
             self.build()
         predictions = self.sess.run(
             self.signitures['prediction'],
-            feed_dict={self.signitures['image_arrays']: image_arrays})
+            feed_dict={self.signitures['image_files']: image_arrays})#self.signitures['image_arrays']: image_arrays})
         return predictions
 
     def load(self, saved_model_dir_or_frozen_graph: Text):

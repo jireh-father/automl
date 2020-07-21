@@ -912,9 +912,11 @@ class InferenceDriver(object):
         image_file_list = glob.glob(image_image_path)
         steps = math.ceil(len(image_file_list) / batch_size)
         params = copy.deepcopy(self.params)
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
         for step in range(steps):
             image_files = image_file_list[step * batch_size:(step + 1) * batch_size]
-            with tf.Session() as sess:
+            with tf.Session(config=config) as sess:
                 # Buid inputs and preprocessing.
                 raw_images, images, scales = build_inputs(image_files,
                                                           params['image_size'])

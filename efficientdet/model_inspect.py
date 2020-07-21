@@ -183,7 +183,7 @@ class ModelInspector(object):
             images = [Image.open(f).convert("RGB") for f in batch_files]
             if len(set([m.size for m in images])) > 1:
                 # Resize only if images in the same batch have different sizes.
-                images = [m.resize(height, width) for m in images]
+                images = [m.resize((height, width)) for m in images]
             raw_images = [np.array(m) for m in images]
             size_before_pad = len(raw_images)
             if size_before_pad < batch_size:

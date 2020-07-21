@@ -87,6 +87,19 @@ python -u model_inspect.py --runmode=infer_and_crop --model_name=efficientdet-d0
 --output_image_dir=[crop된 이미지 저장 디렉토리] --batch_size=256
 ```
 
+### convert ckpt model to saved model
+```bash
+python model_inspect.py --runmode=saved_model --model_name=efficientdet-d0 --ckpt_path=[ckpt모델 파일명] \
+--hparams="num_classes=2" --saved_model_dir=[변경할 모델을 저장할 디렉토리]
+```
+
+### inference and crop bboxes by saved model
+```bash
+python model_inspect.py --runmode=saved_model_infer --model_name=efficientdet-d0 \
+--saved_model_dir=[변경한 모델을 저장한 디렉토리] --input_image=[입력 이미지 경로, ex) test/*] \
+--output_image_dir=[출력결과 디렉토리] --hparams="num_classes=2"
+```
+
 ### e. convert ckpt model to tflite model
 ```bash
 python model_inspect.py \

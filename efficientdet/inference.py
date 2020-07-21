@@ -90,7 +90,7 @@ def image_preprocess(image, image_size: Union[int, Tuple[int, int]]):
 def batch_image_files_decode(image_files):
     raw_images = tf.TensorArray(tf.uint8, size=0, dynamic_size=True)
     for i in tf.range(tf.shape(image_files)[0]):
-        image = tf.io.decode_jpeg(image_files[i])#image(image_files[i])
+        image = tf.io.decode_image(image_files[i])
         image.set_shape([None, None, None])
         raw_images = raw_images.write(i, image)
     return raw_images.stack()
@@ -696,7 +696,7 @@ class ServingDriver(object):
             self.build()
         predictions = self.sess.run(
             self.signitures['prediction'],
-            feed_dict={self.signitures['image_files']: image_arrays})#self.signitures['image_arrays']: image_arrays})
+            feed_dict={self.signitures['image_arrays']: image_arrays})
         return predictions
 
     def load(self, saved_model_dir_or_frozen_graph: Text):

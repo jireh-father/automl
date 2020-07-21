@@ -173,7 +173,7 @@ class ModelInspector(object):
         all_files = list(tf.io.gfile.glob(image_path_pattern))
         print('all_files=', all_files)
         num_batches = (len(all_files) + batch_size - 1) // batch_size
-
+        os.makedirs(output_dir, exist_ok=True)
         for i in range(num_batches):
             batch_files = all_files[i * batch_size:(i + 1) * batch_size]
             height, width = self.model_config.image_size

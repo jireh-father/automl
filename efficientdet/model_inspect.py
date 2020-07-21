@@ -178,21 +178,19 @@ class ModelInspector(object):
         os.makedirs(output_dir, exist_ok=True)
         for i in range(num_batches):
             batch_files = all_files[i * batch_size:(i + 1) * batch_size]
-            print(batch_files)
+            print(len(batch_files))
             height, width = self.model_config.image_size
-            print(height, width)
             images = [Image.open(f).convert("RGB") for f in batch_files]
             if len(set([m.size for m in images])) > 1:
                 # Resize only if images in the same batch have different sizes.
                 images = [m.resize((height, width)) for m in images]
             raw_images = [np.array(m) for m in images]
             size_before_pad = len(raw_images)
-            print(len(raw_images))
             if size_before_pad < batch_size:
                 padding_size = batch_size - size_before_pad
                 raw_images += [np.zeros_like(raw_images[0])] * padding_size
-            print(len(raw_images))
-            detections_bs = driver.serve_images(batch_files)#raw_images)
+
+            detections_bs = driver.serve_images(raw_images)
             print(detections_bs)
             print(detections_bs.shape)
             for j in range(size_before_pad):

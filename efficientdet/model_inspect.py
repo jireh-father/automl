@@ -187,10 +187,11 @@ class ModelInspector(object):
                 images = [m.resize((height, width)) for m in images]
             raw_images = [np.array(m) for m in images]
             size_before_pad = len(raw_images)
+            print(len(raw_images))
             if size_before_pad < batch_size:
                 padding_size = batch_size - size_before_pad
                 raw_images += [np.zeros_like(raw_images[0])] * padding_size
-
+            print(len(raw_images))
             detections_bs = driver.serve_images(raw_images)
             print(detections_bs)
             print(detections_bs.shape)

@@ -121,6 +121,51 @@ python -u infer_and_crop_tflite.py --input_image=[테스트 이미지 경로. ex
 --tflite_path=[tflite 모델 파일 경로]
 ```
 
+## 예측한 이미지로 데이터셋 만들기
+
+### a. tflite 모델로 inference하기
+```bash
+python -u infer_and_crop_tflite.py --input_image=[테스트 이미지 경로. ex) test_image/* ] \
+--output_image_dir=[crop된 이미지 저장할 디렉토리] --min_score_thresh=[crop할 최소 score threshold, ex: 0.6] \
+--tflite_path=[tflite 모델 파일 경로, ex) model.tflite]
+```
+
+### b. 예측한 이미지 검수하기(정상 예측과 오탐 분류)
+예측후 crop된 결과 이미지들을 하나씩 보면서 정상 예측과 오탐을 서로 다른 디렉토리로 분류
+아래 예제처럼 동일한 디렉토리 아래 각각의 디렉토리로 저장하면 됨.
+ex) infer/0_true_positive, infer/1_false_positive
+정상적으로 예측된 이미지도 추가적으로 학습할 경우 정상 예측 이미지 디렉토리 앞에 0을 붙혀야함
+(나중에 라벨 번호를 저장할때 디렉토리명으로 소팅해서 순서대로 라벨번호를 부여하기 때문에 정상 이미지는 1번 라벨로 지정하기 위함)
+
+### c. 예측한 이미지에서 좌표정보 뽑아내어 json형태로 저장하기
+```bash
+python infer_and_extract_bbox_tflite.py --input_image=[crop된 이미지 경로, ex)crop_images/*/*] \
+--output_path=[출력 json파일 경로, ex)eye_annotation.json] \
+--real_image_dir=[위에서 예측한 원본 테스트 이미지 디렉토리] --min_score_thresh=[위에서 예측할때 사용한 값과 동일, ex)0.5] \
+--tflite_path=[위에서 예측한 tflite모델과 동일] --output_image_dir=[좌표정보 뽑아낸 원본 이미지 파일 카피할 디렉토리] \
+--vis_image_dir=[좌표정보 시각화한 이미지 저장할 디렉토리] --target_label_idx=1\ 
+--start_index=[시작 index값, 정상 예측한 이미지도 좌표정보 뽑아내려면 1, 오탐한 이미지 좌표정보만 뽑아내려면 2] \
+--label_dir=[crop된 이미지 경로의 상위 디렉토리, ex)crop_images, --input_image에 입력한 경로의 상위 디렉토리]
+```
+
+### d. 좌표정보 뽑아낸 json파일을 coco 포맷으로 변형하기
+```bash
+python afp_to_coco.py \
+--output_path=[coco 포맷의 출력 json파일 경로, ex)coco.json] \
+--annotation_files=[위에서 좌표정보 뽑아낸 json파일 경로, ex)eye_annotation.json] \
+--label_dir=[위 c.와 동일한 값] \
+--start_idx=[위 c.와 동일한 값]
+```
+
+### e. 최종 학습가능한 tfrecord 포맷으로 변형하기
+```bash
+python -m dataset.create_coco_tfrecord \
+--image_dir=[위 a.에서 테스트 이미지로 사용한 디렉토리명] \
+--object_annotations_file=[위 d.에서 만들어낸 coco 포맷 파일경로, ex)coco.json] \
+--output_file_prefix=[tfrecord 출력 경로, ex)tfrecord/train] \
+--num_shards=4
+```
+
 ## 1. About EfficientDet Models
 
 EfficientDets are a family of object detection models, which achieve state-of-the-art 53.7mAP on COCO test-dev, yet being 4x - 9x smaller and using 13x - 42x fewer FLOPs than previous detectors. Our models also run 2x - 4x faster on GPU, and 5x - 11x faster on CPU than other detectors.

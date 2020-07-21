@@ -160,7 +160,6 @@ class ModelInspector(object):
 
     def saved_model_inference(self, image_path_pattern, output_dir, **kwargs):
         """Perform inference for the given saved model."""
-        print(self.batch_size)
         driver = inference.ServingDriver(
             self.model_name,
             self.ckpt_path,
@@ -174,7 +173,6 @@ class ModelInspector(object):
         batch_size = self.batch_size or 1
         all_files = list(tf.io.gfile.glob(image_path_pattern))
         # print('all_files=', all_files)
-        print("batch_size", batch_size)
         num_batches = (len(all_files) + batch_size - 1) // batch_size
         detected_dir = os.path.join(output_dir, "detected")
         no_detected_dir = os.path.join(output_dir, "no_detected")
@@ -182,7 +180,6 @@ class ModelInspector(object):
         os.makedirs(no_detected_dir, exist_ok=True)
         for i in range(num_batches):
             batch_files = all_files[i * batch_size:(i + 1) * batch_size]
-            print(len(batch_files))
             height, width = self.model_config.image_size
             images = [Image.open(f).convert("RGB") for f in batch_files]
             if len(set([m.size for m in images])) > 1:
@@ -196,7 +193,6 @@ class ModelInspector(object):
 
             detections_bs = driver.serve_images(raw_images)
             print(detections_bs)
-            print(detections_bs.shape)
             for j in range(size_before_pad):
                 if len(detections_bs[j]) == 0:
                     shutil.copy(batch_files[j], no_detected_dir)

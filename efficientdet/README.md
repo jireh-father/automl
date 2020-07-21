@@ -123,6 +123,8 @@ python -u infer_and_crop_tflite.py --input_image=[테스트 이미지 경로. ex
 
 ## 예측한 이미지로 데이터셋 만들기
 
+### 0. 테스트할 이미지 수집하여 한 디렉토리에 저장하기
+
 ### a. tflite 모델로 inference하기
 ```bash
 python -u infer_and_crop_tflite.py --input_image=[테스트 이미지 경로. ex) test_image/* ] \

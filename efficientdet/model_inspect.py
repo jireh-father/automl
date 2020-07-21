@@ -176,6 +176,7 @@ class ModelInspector(object):
         num_batches = (len(all_files) + batch_size - 1) // batch_size
         detected_dir = os.path.join(output_dir, "detected")
         no_detected_dir = os.path.join(output_dir, "no_detected")
+        crop_dir = os.path.join(output_dir, "crop")
         os.makedirs(detected_dir, exist_ok=True)
         os.makedirs(no_detected_dir, exist_ok=True)
         for i in range(num_batches):
@@ -197,6 +198,27 @@ class ModelInspector(object):
                 if len(detections_bs[j]) == 0:
                     shutil.copy(batch_files[j], no_detected_dir)
                 else:
+                    prediction = detections_bs[j]
+                    boxes = prediction[:, 1:5]
+                    classes = prediction[:, 6].astype(int)
+                    scores = prediction[:, 5]
+                    im = Image.open(batch_files[j]).convert("RGB")
+                    crop_cnt = 0
+                    for k, box in enumerate(boxes):
+                        if scores[k] < kwargs["min_score_thresh"]:
+                            continue
+                        crop_cnt += 1
+                        crop_im = im.crop((box[1], box[0], box[3], box[2]))
+                        image_file_name = os.path.splitext(os.path.basename(batch_files[j]))[0]
+                        target_crop_dir = os.path.join(crop_dir, str(classes[k]))
+                        os.makedirs(target_crop_dir, exist_ok=True)
+                        output_image_path = os.path.join(target_crop_dir, "{}_{}.jpg".format(image_file_name, j))
+                        crop_im.save(output_image_path)
+
+                    if crop_cnt < 1:
+                        shutil.copy(batch_files[j], no_detected_dir)
+                        continue
+
                     img = driver.visualize(raw_images[j], detections_bs[j], **kwargs)
                     # img_id = str(i * batch_size + j)
                     output_image_path = os.path.join(detected_dir, os.path.basename(batch_files[j]))

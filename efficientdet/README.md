@@ -78,7 +78,7 @@ python -u main.py --mode=train_and_eval \
 --num_epochs=50 --hparams=voc_config.yaml
 ```
 
-### d. inference and crop bboxes by tflite model
+### d. inference and crop bboxes by ckpt model
 ```bash
 python -u model_inspect.py --runmode=infer_and_crop --model_name=efficientdet-d0(기타 d1~d7 사용가능) \
 --hparams="num_classes=2" --max_boxes_to_draw=5 --min_score_thresh=[crop할 최소 score threshold, ex: 0.6] \

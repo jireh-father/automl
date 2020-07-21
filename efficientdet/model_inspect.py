@@ -188,6 +188,8 @@ class ModelInspector(object):
                 raw_images += [np.zeros_like(raw_images[0])] * padding_size
 
             detections_bs = driver.serve_images(raw_images)
+            print(detections_bs)
+            print(detections_bs.shape)
             for j in range(size_before_pad):
                 img = driver.visualize(raw_images[j], detections_bs[j], **kwargs)
                 img_id = str(i * batch_size + j)

@@ -159,6 +159,7 @@ class ModelInspector(object):
 
     def saved_model_inference(self, image_path_pattern, output_dir, **kwargs):
         """Perform inference for the given saved model."""
+        print(self.batch_size)
         driver = inference.ServingDriver(
             self.model_name,
             self.ckpt_path,

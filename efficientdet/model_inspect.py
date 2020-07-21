@@ -176,6 +176,7 @@ class ModelInspector(object):
         os.makedirs(output_dir, exist_ok=True)
         for i in range(num_batches):
             batch_files = all_files[i * batch_size:(i + 1) * batch_size]
+            print(batch_files)
             height, width = self.model_config.image_size
             images = [Image.open(f) for f in batch_files]
             if len(set([m.size for m in images])) > 1:

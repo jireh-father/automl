@@ -30,6 +30,7 @@ from absl import logging
 import numpy as np
 from PIL import Image
 import tensorflow.compat.v1 as tf
+import shutil
 
 import hparams_config
 import inference
@@ -175,7 +176,10 @@ class ModelInspector(object):
         # print('all_files=', all_files)
         print("batch_size", batch_size)
         num_batches = (len(all_files) + batch_size - 1) // batch_size
-        os.makedirs(output_dir, exist_ok=True)
+        detected_dir = os.path.join(output_dir, "detected")
+        no_detected_dir = os.path.join(output_dir, "no_detected")
+        os.makedirs(detected_dir, exist_ok=True)
+        os.makedirs(no_detected_dir, exist_ok=True)
         for i in range(num_batches):
             batch_files = all_files[i * batch_size:(i + 1) * batch_size]
             print(len(batch_files))
@@ -194,12 +198,14 @@ class ModelInspector(object):
             print(detections_bs)
             print(detections_bs.shape)
             for j in range(size_before_pad):
-                print(detections_bs[j].shape)
-                img = driver.visualize(raw_images[j], detections_bs[j], **kwargs)
-                img_id = str(i * batch_size + j)
-                output_image_path = os.path.join(output_dir, img_id + '.jpg')
-                Image.fromarray(img).save(output_image_path)
-                logging.info('writing file to %s', output_image_path)
+                if len(detections_bs[j]) == 0:
+                    shutil.copy(batch_files[j], no_detected_dir)
+                else:
+                    img = driver.visualize(raw_images[j], detections_bs[j], **kwargs)
+                    # img_id = str(i * batch_size + j)
+                    output_image_path = os.path.join(detected_dir, os.path.basename(batch_files[j]))
+                    Image.fromarray(img).save(output_image_path)
+                    logging.info('writing file to %s', output_image_path)
 
     def saved_model_benchmark(self,
                               image_path_pattern,

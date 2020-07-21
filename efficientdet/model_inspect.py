@@ -178,7 +178,7 @@ class ModelInspector(object):
             batch_files = all_files[i * batch_size:(i + 1) * batch_size]
             print(batch_files)
             height, width = self.model_config.image_size
-            images = [Image.open(f) for f in batch_files]
+            images = [Image.open(f).convert("RGB") for f in batch_files]
             if len(set([m.size for m in images])) > 1:
                 # Resize only if images in the same batch have different sizes.
                 images = [m.resize(height, width) for m in images]

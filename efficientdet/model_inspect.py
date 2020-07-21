@@ -194,6 +194,7 @@ class ModelInspector(object):
             print(detections_bs)
             print(detections_bs.shape)
             for j in range(size_before_pad):
+                print(detections_bs[j].shape)
                 img = driver.visualize(raw_images[j], detections_bs[j], **kwargs)
                 img_id = str(i * batch_size + j)
                 output_image_path = os.path.join(output_dir, img_id + '.jpg')

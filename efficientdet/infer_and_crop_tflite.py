@@ -72,7 +72,7 @@ def main(_):
         im = np.array(pil_im)
         # im = normalize_image(np.array(pil_im))
         im = resize_and_crop_image(im, input_shape[1])
-
+        Image.fromarray(im).save("test.jpg")
         # im = np.array(pil_im.resize((input_shape[2], input_shape[1])))
         im = np.expand_dims(im, axis=0)
         interpreter.set_tensor(input_details[0]['index'], im)
@@ -97,14 +97,14 @@ def main(_):
                     break
                 r_y1, r_x1, r_y2, r_x2 = bboxes[j]
 
-                # y1 = r_y1 / r_h * o_h
-                # y2 = r_y2 / r_h * o_h
-                # x1 = r_x1 / r_w * o_w
-                # x2 = r_x2 / r_w * o_w
-                y1 = r_y1
-                y2 = r_y2
-                x1 = r_x1
-                x2 = r_x2
+                y1 = r_y1 / r_h * o_h
+                y2 = r_y2 / r_h * o_h
+                x1 = r_x1 / r_w * o_w
+                x2 = r_x2 / r_w * o_w
+                # y1 = r_y1
+                # y2 = r_y2
+                # x1 = r_x1
+                # x2 = r_x2
                 if x2 - x1 < 1 or y2 - y1 < 1:
                     print("small box side")
                     continue

@@ -81,6 +81,8 @@ flags.DEFINE_integer('random_seed', 1, 'Max number of boxes to draw.')
 flags.DEFINE_boolean('use_bbox_aug', False, 'Max number of boxes to draw.')
 flags.DEFINE_float('bbox_aug_ratio', 0.1, 'Max number of boxes to draw.')
 
+flags.DEFINE_float('bbox_crop_margin_ratio', 0.1, 'Max number of boxes to draw.')
+
 # For saved model.
 flags.DEFINE_string('saved_model_dir', '/tmp/saved_model',
                     'Folder path for saved model.')
@@ -158,7 +160,7 @@ class ModelInspector(object):
         driver.build()
         driver.export(self.saved_model_dir, self.tflite_path, self.tensorrt)
 
-    def saved_model_inference(self, image_path_pattern, output_dir, **kwargs):
+    def saved_model_inference(self, image_path_pattern, output_dir, bbox_crop_margin_ratio, **kwargs):
         """Perform inference for the given saved model."""
         driver = inference.ServingDriver(
             self.model_name,
@@ -204,11 +206,19 @@ class ModelInspector(object):
                     classes = prediction[:, 6].astype(int)
                     scores = prediction[:, 5]
                     im = Image.open(batch_files[j]).convert("RGB")
+                    w,h = im.size
                     crop_cnt = 0
                     for k, box in enumerate(boxes):
                         if scores[k] < kwargs["min_score_thresh"]:
                             continue
                         crop_cnt += 1
+                        if bbox_crop_margin_ratio != 0.0:
+                            bw = box[3] - box[1]
+                            bh = box[2] - box[0]
+                            box[1] = max(round(box[1] - (bw * bbox_crop_margin_ratio)), 0)
+                            box[3] = min(round(box[3] + (bw * bbox_crop_margin_ratio)), w)
+                            box[0] = max(round(box[0] - (bh * bbox_crop_margin_ratio)), 0)
+                            box[2] = min(round(box[2] + (bh * bbox_crop_margin_ratio)), h)
                         crop_im = im.crop((box[1], box[0], box[3], box[2]))
                         image_file_name = os.path.splitext(os.path.basename(batch_files[j]))[0]
                         target_crop_dir = os.path.join(crop_dir, str(classes[k]))
@@ -506,7 +516,8 @@ class ModelInspector(object):
                                            **config_dict)
             elif runmode == 'saved_model_infer':
                 self.saved_model_inference(kwargs['input_image'],
-                                           kwargs['output_image_dir'], **config_dict)
+                                           kwargs['output_image_dir'],
+                                           kwargs['bbox_crop_margin_ratio'], **config_dict)
             elif runmode == 'saved_model_video':
                 self.saved_model_video(kwargs['input_video'], kwargs['output_video'],
                                        **config_dict)
@@ -554,7 +565,8 @@ def main(_):
         start_index=FLAGS.start_index,
         random_seed=FLAGS.random_seed,
         use_bbox_aug=FLAGS.use_bbox_aug,
-        bbox_aug_ratio=FLAGS.bbox_aug_ratio)
+        bbox_aug_ratio=FLAGS.bbox_aug_ratio,
+        bbox_crop_margin_ratio=FLAGS.bbox_crop_margin_ratio)
 
 
 if __name__ == '__main__':

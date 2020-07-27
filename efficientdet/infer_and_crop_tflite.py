@@ -99,6 +99,10 @@ def main(_):
                 # y2 = r_y2 / r_h * o_h
                 # x1 = r_x1 / r_w * o_w
                 # x2 = r_x2 / r_w * o_w
+                y1 = r_y1
+                y2 = r_y2
+                x1 = r_x1
+                x2 = r_x2
                 print(o_w, o_h, (x1, y1, x2, y2))
                 crop_im = pil_im.crop((x1, y1, x2, y2))
                 output_filename = "{}_{}.jpg".format(os.path.splitext(os.path.basename(image_file))[0], j)

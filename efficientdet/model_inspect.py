@@ -181,8 +181,6 @@ class ModelInspector(object):
         os.makedirs(detected_dir, exist_ok=True)
         os.makedirs(no_detected_dir, exist_ok=True)
         os.makedirs(crop_dir, exist_ok=True)
-        print(333)
-        print(num_batches)
         for i in range(num_batches):
             batch_files = all_files[i * batch_size:(i + 1) * batch_size]
             height, width = self.model_config.image_size

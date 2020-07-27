@@ -22,7 +22,7 @@ FLAGS = flags.FLAGS
 def normalize_image(image):
     """Normalize the image to zero mean and unit variance."""
     # The image normalization is identical to Cloud TPU ResNet.
-    image /= 255.
+    image = image / 255.
 
     offset = np.array([0.485, 0.456, 0.406])
     offset = np.expand_dims(offset, axis=0)

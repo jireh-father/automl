@@ -169,9 +169,7 @@ class ModelInspector(object):
             use_xla=self.use_xla,
             model_params=self.model_config.as_dict(),
             **kwargs)
-        print(111)
         driver.load(self.saved_model_dir)
-        print(222)
         # Serving time batch size should be fixed.
         batch_size = self.batch_size or 1
         all_files = list(tf.io.gfile.glob(image_path_pattern))
@@ -183,6 +181,8 @@ class ModelInspector(object):
         os.makedirs(detected_dir, exist_ok=True)
         os.makedirs(no_detected_dir, exist_ok=True)
         os.makedirs(crop_dir, exist_ok=True)
+        print(333)
+        print(num_batches)
         for i in range(num_batches):
             batch_files = all_files[i * batch_size:(i + 1) * batch_size]
             height, width = self.model_config.image_size

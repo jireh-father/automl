@@ -6,6 +6,7 @@ import glob
 import time
 from PIL import Image
 import os
+import cv2
 
 flags.DEFINE_string('input_image', None, 'Input image path for inference.')
 flags.DEFINE_string('output_image_dir', None, 'Output dir for inference.')
@@ -16,6 +17,40 @@ flags.DEFINE_integer('target_label_idx', 1, 'Score threshold to show box.')
 flags.DEFINE_string('tflite_path', None, 'Path for exporting tflite file.')
 
 FLAGS = flags.FLAGS
+
+
+def normalize_image(image):
+    """Normalize the image to zero mean and unit variance."""
+    # The image normalization is identical to Cloud TPU ResNet.
+    image /= 255
+
+    offset = np.array([0.485, 0.456, 0.406])
+    offset = np.expand_dims(offset, axis=0)
+    offset = np.expand_dims(offset, axis=0)
+    image -= offset
+
+    scale = np.array([0.229, 0.224, 0.225])
+    scale = tf.expand_dims(scale, axis=0)
+    scale = tf.expand_dims(scale, axis=0)
+    image /= scale
+
+    return image
+
+
+def resize_and_crop_image(img, output_size):
+    height, width = img.shape[:2]
+
+    scale = output_size / float(max(width, height))
+
+    if scale != 1.0:
+        height = int(round(height * scale))
+        width = int(round(width * scale))
+        interpolation = cv2.INTER_LINEAR
+        img = cv2.resize(img, dsize=(width, height), interpolation=interpolation)
+
+    img = cv2.copyMakeBorder(img, 0, output_size - height, 0, output_size - width, cv2.BORDER_CONSTANT, value=0)
+
+    return img
 
 
 def main(_):
@@ -34,7 +69,9 @@ def main(_):
     for i, image_file in enumerate(image_files):
         pil_im = Image.open(image_file).convert("RGB")
         o_w, o_h = pil_im.size
-        im = np.array(pil_im.resize((input_shape[2], input_shape[1])))
+        im = normalize_image(np.array(pil_im))
+        im = resize_and_crop_image(im, input_shape[1])
+        # im = np.array(pil_im.resize((input_shape[2], input_shape[1])))
         im = np.expand_dims(im, axis=0)
         interpreter.set_tensor(input_details[0]['index'], im)
         start = time.time()

@@ -30,8 +30,8 @@ def normalize_image(image):
     image -= offset
 
     scale = np.array([0.229, 0.224, 0.225])
-    scale = tf.expand_dims(scale, axis=0)
-    scale = tf.expand_dims(scale, axis=0)
+    scale = np.expand_dims(scale, axis=0)
+    scale = np.expand_dims(scale, axis=0)
     image /= scale
 
     return image
@@ -46,8 +46,6 @@ def resize_and_crop_image(img, output_size):
         height = int(round(height * scale))
         width = int(round(width * scale))
         interpolation = cv2.INTER_LINEAR
-        print(img)
-        print(type(img))
         img = cv2.resize(img, (width, height), interpolation=interpolation)
 
     img = cv2.copyMakeBorder(img, 0, output_size - height, 0, output_size - width, cv2.BORDER_CONSTANT, value=0)

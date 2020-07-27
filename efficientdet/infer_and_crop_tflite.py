@@ -50,7 +50,7 @@ def resize_and_crop_image(img, output_size):
 
     img = cv2.copyMakeBorder(img, 0, output_size - height, 0, output_size - width, cv2.BORDER_CONSTANT, value=0)
 
-    return img
+    return img, width, height
 
 
 def main(_):
@@ -71,7 +71,7 @@ def main(_):
         o_w, o_h = pil_im.size
         im = np.array(pil_im)
         # im = normalize_image(np.array(pil_im))
-        im = resize_and_crop_image(im, input_shape[1])
+        im, r_w, r_h = resize_and_crop_image(im, input_shape[1])
         Image.fromarray(im).save("test.jpg")
         # im = np.array(pil_im.resize((input_shape[2], input_shape[1])))
         im = np.expand_dims(im, axis=0)
@@ -82,8 +82,8 @@ def main(_):
         exec_time = time.time() - start
         print(i, len(image_files), image_file, exec_time)
         total_exec_time += exec_time
-        r_h = input_shape[1]
-        r_w = input_shape[2]
+        # r_h = input_shape[1]
+        # r_w = input_shape[2]
         eye_indexes = np.squeeze(np.argwhere(output_data[0, :, 6] == FLAGS.target_label_idx), 1)
         eyes = []
         if len(eye_indexes) > 0:

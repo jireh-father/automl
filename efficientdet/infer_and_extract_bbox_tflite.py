@@ -30,6 +30,20 @@ flags.DEFINE_float('bbox_aug_ratio', 0.1, 'Path for exporting tflite file.')
 
 FLAGS = flags.FLAGS
 
+def resize_and_crop_image(img, output_size):
+    height, width = img.shape[:2]
+
+    scale = output_size / float(max(width, height))
+
+    if scale != 1.0:
+        height = int(round(height * scale))
+        width = int(round(width * scale))
+        interpolation = cv2.INTER_LINEAR
+        img = cv2.resize(img, (width, height), interpolation=interpolation)
+
+    img = cv2.copyMakeBorder(img, 0, output_size - height, 0, output_size - width, cv2.BORDER_CONSTANT, value=0)
+
+    return img, width, height
 
 def main(_):
     model_path = FLAGS.tflite_path
@@ -88,7 +102,10 @@ def main(_):
         o_w, o_h = pil_im.size
         image_fn = os.path.basename(image_file)
         annotations[image_fn] = {"width": o_w, "height": o_h, "bbox": []}
-        im = np.array(pil_im.resize((input_shape[2], input_shape[1])))
+        # im = np.array(pil_im.resize((input_shape[2], input_shape[1])))
+        im = np.array(pil_im)
+        # im = normalize_image(np.array(pil_im))
+        im, r_w, r_h = resize_and_crop_image(im, input_shape[1])
         im = np.expand_dims(im, axis=0)
         interpreter.set_tensor(input_details[0]['index'], im)
         start = time.time()

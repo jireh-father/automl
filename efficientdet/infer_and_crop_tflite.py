@@ -72,7 +72,6 @@ def main(_):
         im = np.array(pil_im)
         # im = normalize_image(np.array(pil_im))
         im, r_w, r_h = resize_and_crop_image(im, input_shape[1])
-        Image.fromarray(im).save("test.jpg")
         # im = np.array(pil_im.resize((input_shape[2], input_shape[1])))
         im = np.expand_dims(im, axis=0)
         interpreter.set_tensor(input_details[0]['index'], im)

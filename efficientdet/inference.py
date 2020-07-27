@@ -771,7 +771,7 @@ class ServingDriver(object):
                 input_shapes=input_shapes,
                 output_arrays=[signitures['prediction'].op.name])
             converter.experimental_new_converter = True
-            converter.optimizations = []
+            converter.optimizations = [tf.lite.Optimize.OPTIMIZE_FOR_LATENCY]
             # converter.inference_type = tf.int8
             # converter.inference_input_type = tf.int8
             # converter.inference_type = tf.float32

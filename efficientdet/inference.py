@@ -765,12 +765,13 @@ class ServingDriver(object):
             height, width = utils.parse_image_size(self.params['image_size'])
             input_name = signitures['image_arrays'].op.name
             input_shapes = {input_name: [None, height, width, 3]}
-            converter = tf.lite.TFLiteConverter.from_saved_model(
+            converter = tf.lite.TFLiteConverterV2.from_saved_model(
                 output_dir,
                 input_arrays=[input_name],
                 input_shapes=input_shapes,
                 output_arrays=[signitures['prediction'].op.name])
             converter.experimental_new_converter = True
+            converter.optimizations = None
             # converter.inference_type = tf.int8
             # converter.inference_input_type = tf.int8
             # converter.inference_type = tf.float32

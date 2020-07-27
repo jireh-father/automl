@@ -169,8 +169,9 @@ class ModelInspector(object):
             use_xla=self.use_xla,
             model_params=self.model_config.as_dict(),
             **kwargs)
+        print(111)
         driver.load(self.saved_model_dir)
-
+        print(222)
         # Serving time batch size should be fixed.
         batch_size = self.batch_size or 1
         all_files = list(tf.io.gfile.glob(image_path_pattern))

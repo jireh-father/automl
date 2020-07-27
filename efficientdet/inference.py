@@ -88,9 +88,11 @@ def image_preprocess(image, image_size: Union[int, Tuple[int, int]]):
 
 @tf.autograph.to_graph
 def batch_image_files_decode(image_files):
-    raw_images = tf.TensorArray(tf.uint8, size=0, dynamic_size=True)
+    # raw_images = tf.TensorArray(tf.uint8, size=0, dynamic_size=True)
+    raw_images = tf.TensorArray(tf.float32, size=0, dynamic_size=True)
     for i in tf.range(tf.shape(image_files)[0]):
         image = tf.io.decode_image(image_files[i])
+        image = tf.image.convert_image_dtype(image, dtype=tf.float32)
         image.set_shape([None, None, None])
         raw_images = raw_images.write(i, image)
     return raw_images.stack()

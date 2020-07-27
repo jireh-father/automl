@@ -97,7 +97,7 @@ python model_inspect.py --runmode=saved_model --model_name=efficientdet-d0 --ckp
 ```bash
 python model_inspect.py --runmode=saved_model_infer --model_name=efficientdet-d0 \
 --saved_model_dir=[변경한 모델을 저장한 디렉토리] --input_image=[입력 이미지 경로, ex) test/*] \
---output_image_dir=[출력결과 디렉토리] --hparams="num_classes=2" --min_score_thresh=[threshold, ex) 0.5] --batch_size=32
+--output_image_dir=[출력결과 디렉토리] --hparams="num_classes=2" --min_score_thresh=[threshold, ex) 0.5]
 ```
 
 ### e. convert ckpt model to tflite model

@@ -69,9 +69,10 @@ def main(_):
     for i, image_file in enumerate(image_files):
         pil_im = Image.open(image_file).convert("RGB")
         o_w, o_h = pil_im.size
-        # im = normalize_image(np.array(pil_im))
-        # im = resize_and_crop_image(im, input_shape[1])
         im = np.array(pil_im)
+        # im = normalize_image(np.array(pil_im))
+        im = resize_and_crop_image(im, input_shape[1])
+
         # im = np.array(pil_im.resize((input_shape[2], input_shape[1])))
         im = np.expand_dims(im, axis=0)
         interpreter.set_tensor(input_details[0]['index'], im)

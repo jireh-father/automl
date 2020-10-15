@@ -152,6 +152,7 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
             if vis_image_id == 234:
                 print(image_item['file_name'])
                 print(anno_dict['annotations'])
+                print(len(anno_dict['annotations']))
             for anno_item in anno_dict['annotations']:
                 bbox = anno_item['bbox']
                 draw.rectangle(xy=[bbox[0], bbox[1], bbox[2] + bbox[0], bbox[3] + bbox[1]], fill=(255, 0, 0, 100),

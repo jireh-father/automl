@@ -129,6 +129,8 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
         tmp_anno_dict = {}
         for anno_item in anno_dict['annotations']:
             tmp_anno_dict[anno_item['image_id']] = {}
+            if 'annotations' not in tmp_anno_dict[anno_item['image_id']]:
+                tmp_anno_dict[anno_item['image_id']]['annotations'] = []
             tmp_anno_dict[anno_item['image_id']]['annotations'].append(anno_item)
 
         for image_item in anno_dict['images']:

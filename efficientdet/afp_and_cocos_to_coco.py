@@ -126,19 +126,19 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
 
     for anno_file in anno_files:
         anno_dict = json.load(open(anno_file))
-        if len(anno_dict['annotations']) < 1:
-            continue
         tmp_anno_dict = {}
+        for anno_item in anno_dict['annotations']:
+            tmp_anno_dict[anno_item['image_id']] = {}
+            tmp_anno_dict[anno_item['image_id']]['annotations'].append(anno_item)
+
         for image_item in anno_dict['images']:
-            tmp_anno_dict[image_item['id']] = {}
+            if image_item['id'] not in tmp_anno_dict:
+                continue
             tmp_anno_dict[image_item['id']]['images'] = image_item
             tmp_anno_dict[image_item['id']]['annotations'] = []
             if output_image_dir:
                 image_path = os.path.join(image_dir, image_item['file_name'])
                 shutil.copy(image_path, output_image_dir)
-
-        for anno_item in anno_dict['annotations']:
-            tmp_anno_dict[anno_item['image_id']]['annotations'].append(anno_item)
 
         anno_list += list(tmp_anno_dict.values())
 
@@ -149,10 +149,6 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
             image_path = os.path.join(image_dir, image_item['file_name'])
             im = Image.open(image_path).convert("RGB")
             draw = ImageDraw.Draw(im)
-            if vis_image_id == 234:
-                print(image_item['file_name'])
-                print(anno_dict['annotations'])
-                print(len(anno_dict['annotations']))
             for anno_item in anno_dict['annotations']:
                 bbox = anno_item['bbox']
                 draw.rectangle(xy=[bbox[0], bbox[1], bbox[2] + bbox[0], bbox[3] + bbox[1]], fill=(255, 0, 0, 100),

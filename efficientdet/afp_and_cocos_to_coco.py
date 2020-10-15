@@ -123,34 +123,37 @@ def get_afp_anno_list(polygon_files, output_image_dir, vis_dir):
 
 def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
     anno_list = []
-    vis_image_id = 1
+
     for anno_file in anno_files:
         anno_dict = json.load(open(anno_file))
-        image_path = os.path.join(image_dir, anno_dict['images']['file_name'])
+
         tmp_anno_dict = {}
         for image_item in anno_dict['images']:
             tmp_anno_dict[image_item['id']] = {}
             tmp_anno_dict[image_item['id']]['images'] = image_item
             tmp_anno_dict[image_item['id']]['annotations'] = []
             if output_image_dir:
+                image_path = os.path.join(image_dir, image_item['file_name'])
                 shutil.copy(image_path, output_image_dir)
-
-        if vis_dir:
-            im = Image.open(image_path).convert("RGB")
-            draw = ImageDraw.Draw(im)
 
         for anno_item in anno_dict['annotations']:
             tmp_anno_dict[anno_item['image_id']]['annotations'].append(anno_item)
-            if vis_dir:
+
+        anno_list += list(tmp_anno_dict.values())
+    if vis_dir:
+        vis_image_id = 1
+        for anno_dict in anno_list:
+            image_item = anno_item['images']
+            image_path = os.path.join(image_dir, image_item['file_name'])
+            im = Image.open(image_path).convert("RGB")
+            draw = ImageDraw.Draw(im)
+            for anno_item in anno_dict['annotations']:
                 bbox = anno_item['bbox']
                 draw.rectangle(xy=[bbox[0], bbox[1], bbox[2] + bbox[0], bbox[3] + bbox[1]], fill=(255, 0, 0, 100),
                                outline='red')
-
-        if vis_dir:
             im.save(os.path.join(vis_dir, "custom_{}.jpg".format(vis_image_id)))
             vis_image_id += 1
 
-        anno_list += list(tmp_anno_dict.values())
     return anno_list
 
 

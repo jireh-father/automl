@@ -221,9 +221,9 @@ if __name__ == '__main__':
     train_coco_output = get_coco(train_anno_list)
     val_afp_coco_output = get_coco(val_afp_anno_list)
     val_custom_coco_output = get_coco(val_custom_anno_list)
-    print('train image cnt', train_anno_list)
-    print('val afp image cnt', val_afp_coco_output)
-    print('val custom image cnt', val_custom_coco_output)
+    print('train image cnt', len(train_anno_list))
+    print('val afp image cnt', len(val_afp_coco_output))
+    print('val custom image cnt', len(val_custom_coco_output))
 
     json.dump(train_coco_output, open(os.path.join(args.output_dir, "train_coco.json"), "w+"))
     json.dump(val_afp_coco_output, open(os.path.join(args.output_dir, "val_afp_coco.json"), "w+"))

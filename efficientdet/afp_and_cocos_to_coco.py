@@ -137,7 +137,6 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
             if image_item['id'] not in tmp_anno_dict:
                 continue
             tmp_anno_dict[image_item['id']]['images'] = image_item
-            tmp_anno_dict[image_item['id']]['annotations'] = []
             if output_image_dir:
                 image_path = os.path.join(image_dir, image_item['file_name'])
                 shutil.copy(image_path, output_image_dir)

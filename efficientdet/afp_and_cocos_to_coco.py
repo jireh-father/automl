@@ -8,6 +8,7 @@ from pycocotools import mask
 import imagesize
 import random
 import shutil
+from PIL import Image, ImageDraw
 
 
 def parse_args():
@@ -17,6 +18,7 @@ def parse_args():
     parser.add_argument('--coco_anno_files_pattern', dest='coco_anno_files_pattern', default=None, type=str)
     parser.add_argument('--output_dir', dest='output_dir', default=None, type=str)
     parser.add_argument('--output_image_dir', dest='output_image_dir', default=None, type=str)
+    parser.add_argument('--vis_dir', dest='vis_dir', default=None, type=str)
 
     parser.add_argument('--label_dir', dest='label_dir', default=None, type=str)
 
@@ -68,7 +70,7 @@ def init_coco_annotation(label_dir, start_idx):
     return coco_output
 
 
-def get_afp_anno_list(polygon_files, output_image_dir):
+def get_afp_anno_list(polygon_files, output_image_dir, vis_dir):
     anno_data = []
 
     for i, polygon_file in enumerate(polygon_files):
@@ -89,6 +91,12 @@ def get_afp_anno_list(polygon_files, output_image_dir):
 
         if output_image_dir:
             shutil.copy(image_file, output_image_dir)
+
+        if vis_dir:
+            im = Image.open(image_file).convert("RGB")
+            draw = ImageDraw.Draw(im)
+            draw.rectangle((bbox[0], bbox[1], bbox[2] + bbox[0], bbox[3] + bbox[1]), (255, 0, 0, 100), 'red', 5)
+            im.save(os.path.join(vis_dir, "afp_{}.jpg".format(i)))
 
         anno_data.append({
             'images': {
@@ -111,22 +119,33 @@ def get_afp_anno_list(polygon_files, output_image_dir):
     return anno_data
 
 
-def get_custom_anno_list(anno_files, image_dir, output_image_dir):
+def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
     anno_list = []
+    vis_image_id = 1
     for anno_file in anno_files:
         anno_dict = json.load(open(anno_file))
-
+        image_path = os.path.join(image_dir, image_item['file_name'])
         tmp_anno_dict = {}
         for image_item in anno_dict['images']:
             tmp_anno_dict[image_item['id']] = {}
             tmp_anno_dict[image_item['id']]['images'] = image_item
             tmp_anno_dict[image_item['id']]['annotations'] = []
             if output_image_dir:
-                image_path = os.path.join(image_dir, image_item['file_name'])
                 shutil.copy(image_path, output_image_dir)
+
+        if vis_dir:
+            im = Image.open(image_path).convert("RGB")
+            draw = ImageDraw.Draw(im)
 
         for anno_item in anno_dict['annotations']:
             tmp_anno_dict[anno_item['image_id']]['annotations'].append(anno_item)
+            if vis_dir:
+                bbox = anno_item['bbox']
+                draw.rectangle((bbox[0], bbox[1], bbox[2] + bbox[0], bbox[3] + bbox[1]), (255, 0, 0, 100), 'red', 5)
+
+        if vis_dir:
+            im.save(os.path.join(vis_dir, "custom_{}.jpg".format(vis_image_id)))
+            vis_image_id += 1
 
         anno_list += list(tmp_anno_dict.values())
     return anno_list
@@ -152,7 +171,10 @@ def get_coco(anno_list):
 if __name__ == '__main__':
     args = parse_args()
     random.seed(args.seed)
-    os.makedirs(args.output_image_dir, exist_ok=True)
+    if args.output_image_dir:
+        os.makedirs(args.output_image_dir, exist_ok=True)
+    if args.vis_dir:
+        os.makedirs(args.vis_dir, exist_ok=True)
     os.makedirs(args.output_dir, exist_ok=True)
 
     anno_sample = {"segmentation": [],
@@ -169,10 +191,10 @@ if __name__ == '__main__':
     random.shuffle(seg_files)
     seg_files = seg_files[:int(len(seg_files) * args.afp_ratio)]
 
-    afp_anno_list = get_afp_anno_list(seg_files, args.output_image_dir)
+    afp_anno_list = get_afp_anno_list(seg_files, args.output_image_dir, args.vis_dir)
 
     coco_anno_files = glob.glob(args.coco_anno_files_pattern)
-    custom_anno_list = get_custom_anno_list(coco_anno_files, args.custom_image_dir, args.output_image_dir)
+    custom_anno_list = get_custom_anno_list(coco_anno_files, args.custom_image_dir, args.output_image_dir, args.vis_dir)
 
     random.shuffle(afp_anno_list)
     random.shuffle(custom_anno_list)

@@ -126,7 +126,8 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
 
     for anno_file in anno_files:
         anno_dict = json.load(open(anno_file))
-
+        if len(anno_dict['annotations']) < 1:
+            continue
         tmp_anno_dict = {}
         for image_item in anno_dict['images']:
             tmp_anno_dict[image_item['id']] = {}
@@ -140,6 +141,7 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
             tmp_anno_dict[anno_item['image_id']]['annotations'].append(anno_item)
 
         anno_list += list(tmp_anno_dict.values())
+
     if vis_dir:
         vis_image_id = 1
         for anno_dict in anno_list:

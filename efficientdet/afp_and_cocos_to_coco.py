@@ -126,7 +126,7 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
     vis_image_id = 1
     for anno_file in anno_files:
         anno_dict = json.load(open(anno_file))
-        image_path = os.path.join(image_dir, image_item['file_name'])
+        image_path = os.path.join(image_dir, anno_dict['images']['file_name'])
         tmp_anno_dict = {}
         for image_item in anno_dict['images']:
             tmp_anno_dict[image_item['id']] = {}

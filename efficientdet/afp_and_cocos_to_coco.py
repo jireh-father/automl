@@ -143,7 +143,7 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
     if vis_dir:
         vis_image_id = 1
         for anno_dict in anno_list:
-            image_item = anno_item['images']
+            image_item = anno_dict['images']
             image_path = os.path.join(image_dir, image_item['file_name'])
             im = Image.open(image_path).convert("RGB")
             draw = ImageDraw.Draw(im)

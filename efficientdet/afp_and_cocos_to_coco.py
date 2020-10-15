@@ -118,6 +118,7 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir):
 
         tmp_anno_dict = {}
         for image_item in anno_dict['images']:
+            tmp_anno_dict[image_item['id']] = {}
             tmp_anno_dict[image_item['id']]['images'] = image_item
             tmp_anno_dict[image_item['id']]['annotations'] = []
             if output_image_dir:

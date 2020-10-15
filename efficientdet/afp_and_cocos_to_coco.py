@@ -96,7 +96,7 @@ def get_afp_anno_list(polygon_files, output_image_dir, vis_dir):
             im = Image.open(image_file).convert("RGB")
             draw = ImageDraw.Draw(im)
             draw.rectangle(xy=[bbox[0], bbox[1], bbox[2] + bbox[0], bbox[3] + bbox[1]], fill=(255, 0, 0, 100),
-                           outline='red', width=5)
+                           outline='red')
 
             im.save(os.path.join(vis_dir, "afp_{}.jpg".format(i)))
 
@@ -144,7 +144,7 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
             if vis_dir:
                 bbox = anno_item['bbox']
                 draw.rectangle(xy=[bbox[0], bbox[1], bbox[2] + bbox[0], bbox[3] + bbox[1]], fill=(255, 0, 0, 100),
-                               outline='red', width=5)
+                               outline='red')
 
         if vis_dir:
             im.save(os.path.join(vis_dir, "custom_{}.jpg".format(vis_image_id)))

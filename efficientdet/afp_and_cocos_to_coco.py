@@ -150,6 +150,7 @@ def get_custom_anno_list(anno_files, image_dir, output_image_dir, vis_dir):
             im = Image.open(image_path).convert("RGB")
             draw = ImageDraw.Draw(im)
             if vis_image_id == 243:
+                print(image_item['file_name'])
                 print(anno_dict['annotations'])
             for anno_item in anno_dict['annotations']:
                 bbox = anno_item['bbox']

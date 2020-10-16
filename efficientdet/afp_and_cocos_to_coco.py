@@ -194,38 +194,40 @@ if __name__ == '__main__':
                    "category_id": 1,
                    "id": 1}
 
-    seg_files = []
-    if args.afp_image_dir:
-        seg_files = glob.glob(os.path.join(args.afp_image_dir, "*.xy"))
-    random.shuffle(seg_files)
-    seg_files = seg_files[:int(len(seg_files) * args.afp_ratio)]
+    if args.afp_ratio > 0:
+        seg_files = []
+        if args.afp_image_dir:
+            seg_files = glob.glob(os.path.join(args.afp_image_dir, "*.xy"))
+        random.shuffle(seg_files)
+        seg_files = seg_files[:int(len(seg_files) * args.afp_ratio)]
 
-    afp_anno_list = get_afp_anno_list(seg_files, args.output_image_dir, args.vis_dir)
+        afp_anno_list = get_afp_anno_list(seg_files, args.output_image_dir, args.vis_dir)
+        random.shuffle(afp_anno_list)
+        afp_train_last_index = round(len(afp_anno_list) * args.train_ratio)
+        train_afp_anno_list = afp_anno_list[:afp_train_last_index]
+        val_afp_anno_list = afp_anno_list[afp_train_last_index:]
 
     coco_anno_files = glob.glob(args.coco_anno_files_pattern)
     custom_anno_list = get_custom_anno_list(coco_anno_files, args.custom_image_dir, args.output_image_dir, args.vis_dir)
 
-    random.shuffle(afp_anno_list)
     random.shuffle(custom_anno_list)
-
-    afp_train_last_index = round(len(afp_anno_list) * args.train_ratio)
-    train_afp_anno_list = afp_anno_list[:afp_train_last_index]
-    val_afp_anno_list = afp_anno_list[afp_train_last_index:]
 
     custom_train_last_index = round(len(custom_anno_list) * args.train_ratio)
     train_custom_anno_list = custom_anno_list[:custom_train_last_index]
     val_custom_anno_list = custom_anno_list[custom_train_last_index:]
 
-    train_anno_list = train_afp_anno_list + train_custom_anno_list
-
+    if args.afp_ratio > 0:
+        train_anno_list = train_afp_anno_list + train_custom_anno_list
+        val_afp_coco_output = get_coco(val_afp_anno_list)
+        print('val afp image cnt', len(val_afp_anno_list))
+        json.dump(val_afp_coco_output, open(os.path.join(args.output_dir, "val_afp_coco.json"), "w+"))
+    else:
+        train_anno_list = train_custom_anno_list
     train_coco_output = get_coco(train_anno_list)
-    val_afp_coco_output = get_coco(val_afp_anno_list)
     val_custom_coco_output = get_coco(val_custom_anno_list)
     print('train image cnt', len(train_anno_list))
-    print('val afp image cnt', len(val_afp_anno_list))
     print('val custom image cnt', len(val_custom_anno_list))
 
     json.dump(train_coco_output, open(os.path.join(args.output_dir, "train_coco.json"), "w+"))
-    json.dump(val_afp_coco_output, open(os.path.join(args.output_dir, "val_afp_coco.json"), "w+"))
     json.dump(val_custom_coco_output, open(os.path.join(args.output_dir, "val_custom_coco.json"), "w+"))
     print("complete")

@@ -973,7 +973,8 @@ class InferenceDriver(object):
                             disable_pyfun=self.disable_pyfun,
                             label_id_mapping=self.label_id_mapping,
                             **kwargs)
-                        output_image_path = os.path.join(detected_dir, str(i) + '.jpg')
+                        output_image_path = os.path.join(detected_dir,
+                                                         "{}_{}.jpg".format(os.path.basename(image_files[i]), i))
                         Image.fromarray(img).save(output_image_path)
                     else:
                         shutil.copy(image_files[i], no_detecte_dir)

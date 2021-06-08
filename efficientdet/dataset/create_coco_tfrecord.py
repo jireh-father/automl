@@ -111,7 +111,10 @@ def create_tf_example(image,
   with tf.gfile.GFile(full_path, 'rb') as fid:
     encoded_jpg = fid.read()
   encoded_jpg_io = io.BytesIO(encoded_jpg)
-  image = PIL.Image.open(encoded_jpg_io)
+  try:
+    image = PIL.Image.open(encoded_jpg_io)
+  except:
+    print(encoded_jpg_io)
   key = hashlib.sha256(encoded_jpg).hexdigest()
   feature_dict = {
       'image/height':

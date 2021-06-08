@@ -44,6 +44,7 @@ from pycocotools import mask
 import tensorflow.compat.v1 as tf
 from dataset import label_map_util
 from dataset import tfrecord_util
+from PIL import Image
 
 flags.DEFINE_boolean(
     'include_masks', False, 'Whether to include instance segmentations masks '
@@ -294,7 +295,15 @@ def _create_tf_record_from_coco_annotations(images_info_file,
                                   (i, num_shards)) for i in range(num_shards)
   ]
   images = _load_images_info(images_info_file)
-
+  new_images = []
+  for image in images:
+      filename = image['file_name']
+      try:
+        Image.open(os.path.join(image_dir, filename))
+        new_images.append(image)
+      except:
+        pass
+  images = new_images
   img_to_obj_annotation = None
   img_to_caption_annotation = None
   category_index = None

@@ -114,7 +114,7 @@ def create_tf_example(image,
   try:
     image = PIL.Image.open(encoded_jpg_io)
   except:
-    print(encoded_jpg_io)
+    print("error", full_path)
   key = hashlib.sha256(encoded_jpg).hexdigest()
   feature_dict = {
       'image/height':
